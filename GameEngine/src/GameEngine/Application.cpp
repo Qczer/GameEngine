@@ -18,7 +18,6 @@ namespace GameEngine {
 	void Application::Run() const
 	{
 		std::println("Hello, its Sandbox!");
-		std::cin.get();
 	}
 
 }
