@@ -10,6 +10,10 @@
 	#error Game Engine only supports Windows!
 #endif
 
+#ifdef GE_DEBUG
+	#define GE_ENABLE_ASSERTS
+#endif
+
 #ifdef GE_ENABLE_ASSERTS
 	#define GE_ASSERT(x, ...) { if(!(x)) { GE_ERROR("Assertion Failed: {}", __VA_ARGS__); __debugbreak(); } }
 	#define GE_CORE_ASSERT(x, ...) { if(!(x)) { GE_CORE_ERROR("Assertion Failed: {}", __VA_ARGS__); __debugbreak(); } }
