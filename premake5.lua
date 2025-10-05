@@ -47,8 +47,6 @@ project "GameEngine"
 		"%{IncludeDir.ImGui}"
 	}
 
-	print(IncludeDir.GLFW)
-
 	links
 	{
 		"GLFW",
