@@ -13,11 +13,13 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
-IncludeDir["GLFW"] = "GameEngine/vendor/GLFW/include"
-IncludeDir["Glad"] = "GameEngine/vendor/Glad/include"
+IncludeDir["GLFW"] = "%{wks.location}/GameEngine/vendor/GLFW/include"
+IncludeDir["Glad"] = "%{wks.location}/GameEngine/vendor/Glad/include"
+IncludeDir["ImGui"] = "%{wks.location}/GameEngine/vendor/imgui"
 
 include "GameEngine/vendor/GLFW"
 include "GameEngine/vendor/Glad"
+include "GameEngine/vendor/imgui"
 
 project "GameEngine"
 	location "GameEngine"
@@ -41,13 +43,17 @@ project "GameEngine"
 		"%{prj.name}/src",
 		"%{prj.name}/vendor/spdlog/include",
 		"%{IncludeDir.GLFW}",
-		"%{IncludeDir.Glad}"
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.ImGui}"
 	}
+
+	print(IncludeDir.GLFW)
 
 	links
 	{
 		"GLFW",
 		"Glad",
+		"ImGui",
 		"opengl32.lib"
 	}
 
