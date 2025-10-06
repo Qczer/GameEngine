@@ -5,6 +5,13 @@
 #include "GameEngine/Application.h"
 #include "GameEngine/Layer.h"
 #include "GameEngine/Log.h"
+
+#include "GameEngine/Input.h"
+#include "GameEngine/KeyCodes.h"
+#include "GameEngine/MouseButtonCodes.h"
+
+#include <GameEngine/Events/Event.h>
+
 #include "GameEngine/Imgui/ImGuiLayer.h"
 
 #include "GameEngine/EntryPoint.h"
