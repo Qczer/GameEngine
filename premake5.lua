@@ -11,15 +11,17 @@ workspace "GameEngine"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
--- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["GLFW"] = "%{wks.location}/GameEngine/vendor/GLFW/include"
 IncludeDir["Glad"] = "%{wks.location}/GameEngine/vendor/Glad/include"
 IncludeDir["ImGui"] = "%{wks.location}/GameEngine/vendor/imgui"
 
-include "GameEngine/vendor/GLFW"
-include "GameEngine/vendor/Glad"
-include "GameEngine/vendor/imgui"
+group "Dependencies"
+	include "GameEngine/vendor/GLFW"
+	include "GameEngine/vendor/Glad"
+	include "GameEngine/vendor/imgui"
+
+group ""
 
 project "GameEngine"
 	location "GameEngine"
@@ -27,8 +29,8 @@ project "GameEngine"
 	language "C++"
 	staticruntime "off"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	pchheader "gepch.h"
 	pchsource "GameEngine/src/gepch.cpp"
@@ -56,6 +58,11 @@ project "GameEngine"
 		"opengl32.lib"
 	}
 
+	postbuildcommands
+	{
+		("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+	}
+
 	filter "system:windows"
 		cppdialect "C++23"
 		systemversion "latest"
@@ -67,10 +74,19 @@ project "GameEngine"
 			"GLFW_INCLUDE_NONE"
 		}
 
-		postbuildcommands
+		prebuildcommands
 		{
-			("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
+			('IF NOT EXIST "..\\bin\\' .. outputdir .. '\\Sandbox" mkdir "..\\bin\\' .. outputdir .. '\\Sandbox"')
 		}
+
+	-- Add later for cross-platform support
+	--[[filter "system:linux" or "system:macosx"
+		prebuildcommands
+		{
+			-- The equivalent command for Linux/macOS systems
+			('mkdir -p "../bin/' .. outputdir .. '/Sandbox"')
+		}
+	]]
 
 	filter "configurations:Debug"
 		defines "GE_DEBUG"
@@ -97,8 +113,8 @@ project "Sandbox"
 	language "C++"
 	staticruntime "off"
 
-	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
 
 	files
 	{
