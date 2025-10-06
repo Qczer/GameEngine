@@ -165,9 +165,4 @@ namespace GameEngine {
 		return m_Data.VSync;
 	}
 
-	void* WindowsWindow::GetNativeWindow() const
-	{
-		return m_Window; // Assuming m_Window is your GLFWwindow*
-	}
-
 }
