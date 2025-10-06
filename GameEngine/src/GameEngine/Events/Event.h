@@ -74,4 +74,9 @@ namespace GameEngine {
 	inline std::string format_as(const Event& e) {
 		return e.ToString();
 	}
+
+	inline std::ostream& operator<<(std::ostream& os, const Event& e) {
+		return os << e.ToString();
+	}
+
 }
