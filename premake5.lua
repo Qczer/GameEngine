@@ -26,9 +26,11 @@ group ""
 
 project "GameEngine"
 	location "GameEngine"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
-	staticruntime "off"
+	cppdialect "C++23"
+	staticruntime "on"
+
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -62,13 +64,7 @@ project "GameEngine"
 		"opengl32.lib"
 	}
 
-	postbuildcommands
-	{
-		("{COPYFILE} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox")
-	}
-
 	filter "system:windows"
-		cppdialect "C++23"
 		systemversion "latest"
 
 		defines
@@ -78,34 +74,20 @@ project "GameEngine"
 			"GLFW_INCLUDE_NONE"
 		}
 
-		prebuildcommands
-		{
-			('IF NOT EXIST "..\\bin\\' .. outputdir .. '\\Sandbox" mkdir "..\\bin\\' .. outputdir .. '\\Sandbox"')
-		}
-
-	-- Add later for cross-platform support
-	--[[filter "system:linux" or "system:macosx"
-		prebuildcommands
-		{
-			-- The equivalent command for Linux/macOS systems
-			('mkdir -p "../bin/' .. outputdir .. '/Sandbox"')
-		}
-	]]
-
 	filter "configurations:Debug"
 		defines "GE_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "GE_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "GE_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "action:vs*"
 		buildoptions { "/utf-8" }
@@ -115,7 +97,7 @@ project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
-	staticruntime "off"
+	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
@@ -151,17 +133,17 @@ project "Sandbox"
 	filter "configurations:Debug"
 		defines "GE_DEBUG"
 		runtime "Debug"
-		symbols "On"
+		symbols "on"
 
 	filter "configurations:Release"
 		defines "GE_RELEASE"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "configurations:Dist"
 		defines "GE_DIST"
 		runtime "Release"
-		optimize "On"
+		optimize "on"
 
 	filter "action:vs*"
 		buildoptions { "/utf-8" }
