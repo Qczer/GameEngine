@@ -4,7 +4,7 @@
 
 namespace GameEngine {
 
-	class GAME_ENGINE_API ImGuiLayer : public Layer
+	class ImGuiLayer : public Layer
 	{
 	public:
 		ImGuiLayer();
