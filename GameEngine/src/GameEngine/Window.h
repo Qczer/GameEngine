@@ -22,7 +22,7 @@ namespace GameEngine {
 	};
 
 	// Abstracts a platform specific window
-	class GAME_ENGINE_API Window
+	class Window
 	{
 	public:
 		using EventCallbackFn = std::function<void(Event&)>;
