@@ -1355,9 +1355,6 @@
     <ClCompile Include="src\GameEngine\Application.cpp">
       <Filter>src\GameEngine</Filter>
     </ClCompile>
-    <ClCompile Include="src\GameEngine\ImGui\ImGuiBuild.cpp">
-      <Filter>src\GameEngine\ImGui</Filter>
-    </ClCompile>
     <ClCompile Include="src\GameEngine\ImGui\ImGuiLayer.cpp">
       <Filter>src\GameEngine\ImGui</Filter>
     </ClCompile>
