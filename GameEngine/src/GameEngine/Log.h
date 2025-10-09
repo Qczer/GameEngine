@@ -6,7 +6,7 @@
 
 namespace GameEngine {
 
-	class GAME_ENGINE_API Log
+	class Log
 	{
 	public:
 		static void Init();

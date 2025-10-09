@@ -4,7 +4,7 @@
 
 namespace GameEngine {
 
-	class GAME_ENGINE_API MouseMovedEvent : public Event
+	class MouseMovedEvent : public Event
 	{
 	public:
 		MouseMovedEvent(float x, float y)
@@ -24,7 +24,7 @@ namespace GameEngine {
 		float m_MouseX, m_MouseY;
 	};
 
-	class GAME_ENGINE_API MouseScrolledEvent : public Event
+	class MouseScrolledEvent : public Event
 	{
 	public:
 		MouseScrolledEvent(float xOffset, float yOffset)
@@ -44,7 +44,7 @@ namespace GameEngine {
 		float m_XOffset, m_YOffset;
 	};
 
-	class GAME_ENGINE_API MouseButtonEvent : public Event
+	class MouseButtonEvent : public Event
 	{
 	public:
 		inline int GetMouseButton() const { return m_Button; }
@@ -57,7 +57,7 @@ namespace GameEngine {
 		int m_Button;
 	};
 
-	class GAME_ENGINE_API MouseButtonPressedEvent : public MouseButtonEvent
+	class MouseButtonPressedEvent : public MouseButtonEvent
 	{
 	public:
 		MouseButtonPressedEvent(int button)
@@ -71,7 +71,7 @@ namespace GameEngine {
 		EVENT_CLASS_TYPE(MouseButtonPressed)
 	};
 
-	class GAME_ENGINE_API MouseButtonReleasedEvent : public MouseButtonEvent
+	class MouseButtonReleasedEvent : public MouseButtonEvent
 	{
 	public:
 		MouseButtonReleasedEvent(int button)
