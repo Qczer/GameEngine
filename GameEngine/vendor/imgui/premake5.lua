@@ -2,7 +2,8 @@ project "ImGui"
     location "GameEngine/vendor/imgui"
 	kind "StaticLib"
 	language "C++"
-    staticruntime "off"
+    staticruntime "on"
+	cppdialect "C++23"
 
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -37,12 +38,10 @@ project "ImGui"
 
 	filter "system:windows"
 		systemversion "latest"
-		cppdialect "C++23"
 
 	filter "system:linux"
 		pic "On"
 		systemversion "latest"
-		cppdialect "C++23"
 
 	filter "configurations:Debug"
 		runtime "Debug"
