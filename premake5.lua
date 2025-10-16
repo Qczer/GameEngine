@@ -92,7 +92,6 @@ project "GameEngine"
 	filter "action:vs*"
 		buildoptions { "/utf-8" }
 
-
 project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"

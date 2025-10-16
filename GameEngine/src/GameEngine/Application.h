@@ -6,6 +6,7 @@
 #include "GameEngine/LayerStack.h"
 #include "GameEngine/Events/Event.h"
 #include "GameEngine/Events/ApplicationEvent.h"
+#include "GameEngine/Renderer/Shader.h"
 
 #include "GameEngine/ImGui/ImGuiLayer.h"
 
@@ -37,6 +38,7 @@ namespace GameEngine {
 		LayerStack m_LayerStack;
 
 		unsigned int m_VertexArray, m_VertexBuffer, m_IndexBuffer;
+		std::unique_ptr<Shader> m_Shader;
 	private:
 		static Application* s_Instance;
 	};
