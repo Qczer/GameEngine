@@ -41,8 +41,13 @@ namespace GameEngine {
 			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
 		}
 
-		ImGui_ImplGlfw_InitForOpenGL(window, true);
-		ImGui_ImplOpenGL3_Init("#version 460");
+		static bool first = true;
+		if (first)
+		{
+			ImGui_ImplGlfw_InitForOpenGL(window, true);
+			ImGui_ImplOpenGL3_Init("#version 460");
+		}
+		first = false;
 	}
 
 	void ImGuiLayer::OnDetach()
