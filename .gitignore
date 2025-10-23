@@ -5,8 +5,11 @@
 
 ## Custom
 
-bin/
+/bin/
 bin-int/
+
+## Important for the premake binary
+!vendor/bin/premake/
 
 # Not needed because of premake
 *.sln
