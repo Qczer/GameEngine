@@ -1,7 +1,11 @@
 #include <GameEngine.h>
 
+#include "Platform/OpenGL/OpenGLShader.h"
+
 #include "imgui/imgui.h"
+
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 class ExampleLayer : public GameEngine::Layer
 {
@@ -101,11 +105,8 @@ public:
 			uniform mat4 u_ViewProjection;
 			uniform mat4 u_Transform;
 
-			out vec3 v_Position;
-
 			void main()
 			{
-				v_Position = a_Position;
 				gl_Position = u_ViewProjection * u_Transform * vec4(a_Position, 1.0);	
 			}
 		)";
@@ -115,16 +116,16 @@ public:
 			
 			layout(location = 0) out vec4 color;
 
-			in vec3 v_Position;
+			uniform vec3 u_Color;
 
 			void main()
 			{
-				color = vec4(0.2, 0.3, 0.8, 1.0);
+				color = vec4(u_Color, 1.0);
 			}
 		)";
 
 		m_Shader.reset(GameEngine::Shader::Create(vertexSrc, fragmentSrc));
-		m_SquareShader.reset(GameEngine::Shader::Create(squareVertexSrc, squareFragmentSrc));
+		m_FlatColorShader.reset(GameEngine::Shader::Create(squareVertexSrc, squareFragmentSrc));
 	}
 
 	void OnUpdate(GameEngine::Timestep ts) override
@@ -153,7 +154,10 @@ public:
 
 		GameEngine::Renderer::BeginScene(m_Camera);
 
-		static glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+
+		std::dynamic_pointer_cast<GameEngine::OpenGLShader>(m_FlatColorShader)->Bind();
+		std::dynamic_pointer_cast<GameEngine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
 
 		for (int y = 0; y < 20; y++)
 		{
@@ -161,7 +165,7 @@ public:
 			{
 				glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
 				glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-				GameEngine::Renderer::Submit(m_SquareShader, m_SquareVA, transform);
+				GameEngine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
 			}
 		}
 
@@ -172,6 +176,9 @@ public:
 
 	virtual void OnImGuiRender() override
 	{
+		ImGui::Begin("Settings");
+		ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+		ImGui::End();
 	}
 
 	void OnEvent(GameEngine::Event& event) override
@@ -181,7 +188,7 @@ private:
 	std::shared_ptr<GameEngine::Shader> m_Shader;
 	std::shared_ptr<GameEngine::VertexArray> m_VertexArray;
 
-	std::shared_ptr<GameEngine::Shader> m_SquareShader;
+	std::shared_ptr<GameEngine::Shader> m_FlatColorShader;
 	std::shared_ptr<GameEngine::VertexArray> m_SquareVA;
 
 	GameEngine::OrthographicCamera m_Camera;
@@ -190,6 +197,8 @@ private:
 
 	float m_CameraRotation = 0.0f;
 	float m_CameraRotationSpeed = 180.0f;
+
+	glm::vec3 m_SquareColor = { 0.2f, 0.3f, 0.8f };
 };
 
 class Sandbox : public GameEngine::Application
