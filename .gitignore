@@ -8,6 +8,12 @@
 bin/
 bin-int/
 
+# Not needed because of premake
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.hint
 
 # User-specific files
 *.rsuser
