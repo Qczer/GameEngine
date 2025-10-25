@@ -11,6 +11,7 @@
 #include "GameEngine/Input.h"
 #include "GameEngine/KeyCodes.h"
 #include "GameEngine/MouseButtonCodes.h"
+#include "GameEngine/OrthographicCameraController.h"
 
 #include "GameEngine/Imgui/ImGuiLayer.h"
 
@@ -23,7 +24,6 @@
 #include "GameEngine/Renderer/Texture.h"
 #include "GameEngine/Renderer/VertexArray.h"
 
-#include "GameEngine/Renderer/OrthographicCamera.h"
 
 // ---Entry Point-----------------
 #include "GameEngine/EntryPoint.h"
