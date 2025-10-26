@@ -24,6 +24,3 @@
 #include "GameEngine/Renderer/VertexArray.h"
 
 #include "GameEngine/Renderer/OrthographicCameraController.h"
-
-// ---Entry Point-----------------
-#include "GameEngine/Core/EntryPoint.h"
