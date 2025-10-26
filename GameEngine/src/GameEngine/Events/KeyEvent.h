@@ -27,7 +27,7 @@ namespace GameEngine {
 
 		std::string ToString() const override
 		{
-			return std::format("KeyPressed {} ({} repeats)", m_KeyCode, m_RepeatCount);
+			return std::format("KeyPressedEvent {} ({} repeats)", m_KeyCode, m_RepeatCount);
 		}
 
 		EVENT_CLASS_TYPE(KeyPressed)
@@ -43,10 +43,24 @@ namespace GameEngine {
 
 		std::string ToString() const override
 		{
-			return std::format("KeyReleased {}", m_KeyCode);
+			return std::format("KeyReleasedEvent {}", m_KeyCode);
 		}
 
 		EVENT_CLASS_TYPE(KeyReleased)
+	};
+
+	class KeyTypedEvent : public KeyEvent
+	{
+	public:
+		KeyTypedEvent(int keycode)
+			: KeyEvent(keycode) {}
+
+		std::string ToString() const override
+		{
+			return std::format("KeyTypedEvent {}", m_KeyCode);
+		}
+
+		EVENT_CLASS_TYPE(KeyTyped)
 	};
 
 }
