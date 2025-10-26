@@ -8,6 +8,9 @@
 /bin/
 bin-int/
 
+## Ignore ImGui windows position files
+Sandbox/imgui.ini
+
 ## Important for the premake binary
 !vendor/bin/premake/
 
