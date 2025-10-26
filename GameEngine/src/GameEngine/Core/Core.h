@@ -59,7 +59,7 @@
 	#error Hazel only supports Windows!
 #endif // End of DLL support
 
-#ifdef GE_DEBUG
+#ifdef GE_BUILD_DEBUG
 	#define GE_ENABLE_ASSERTS
 #endif
 

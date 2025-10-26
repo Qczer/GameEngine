@@ -83,17 +83,17 @@ project "GameEngine"
 		}
 
 	filter "configurations:Debug"
-		defines "GE_DEBUG"
+		defines "GE_BUILD_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "GE_RELEASE"
+		defines "GE_BUILD_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "GE_DIST"
+		defines "GE_BUILD_DIST"
 		runtime "Release"
 		optimize "on"
 
@@ -133,17 +133,17 @@ project "Sandbox"
 		systemversion "latest"
 
 	filter "configurations:Debug"
-		defines "GE_DEBUG"
+		defines "GE_BUILD_DEBUG"
 		runtime "Debug"
 		symbols "on"
 
 	filter "configurations:Release"
-		defines "GE_RELEASE"
+		defines "GE_BUILD_RELEASE"
 		runtime "Release"
 		optimize "on"
 
 	filter "configurations:Dist"
-		defines "GE_DIST"
+		defines "GE_BUILD_DIST"
 		runtime "Release"
 		optimize "on"
 
