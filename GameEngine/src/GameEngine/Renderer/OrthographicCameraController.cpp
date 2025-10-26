@@ -1,8 +1,8 @@
 #include "gepch.h"
 #include "OrthographicCameraController.h"
 
-#include "GameEngine/Input.h"
-#include "GameEngine/KeyCodes.h"
+#include "GameEngine/Core/Input.h"
+#include "GameEngine/Core/KeyCodes.h"
 
 namespace GameEngine {
 
@@ -14,13 +14,25 @@ namespace GameEngine {
 	void OrthographicCameraController::OnUpdate(Timestep ts)
 	{
 		if (Input::IsKeyPressed(GE_KEY_A))
-			m_CameraPosition.x -= m_CameraTranslationSpeed * ts;
+		{
+			m_CameraPosition.x -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y -= sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		}
 		if (Input::IsKeyPressed(GE_KEY_D))
-			m_CameraPosition.x += m_CameraTranslationSpeed * ts;
+		{
+			m_CameraPosition.x += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y += sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		}
 		if (Input::IsKeyPressed(GE_KEY_S))
-			m_CameraPosition.y -= m_CameraTranslationSpeed * ts;
+		{
+			m_CameraPosition.x -= -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y -= cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		}
 		if (Input::IsKeyPressed(GE_KEY_W))
-			m_CameraPosition.y += m_CameraTranslationSpeed * ts;
+		{
+			m_CameraPosition.x += -sin(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+			m_CameraPosition.y += cos(glm::radians(m_CameraRotation)) * m_CameraTranslationSpeed * ts;
+		}
 
 		if (m_Rotation)
 		{

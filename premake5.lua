@@ -78,7 +78,6 @@ project "GameEngine"
 
 		defines
 		{
-			"GE_PLATFORM_WINDOWS",
 			"GE_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
@@ -132,11 +131,6 @@ project "Sandbox"
 	filter "system:windows"
 		cppdialect "C++23"
 		systemversion "latest"
-
-		defines
-		{
-			"GE_PLATFORM_WINDOWS"
-		}
 
 	filter "configurations:Debug"
 		defines "GE_DEBUG"

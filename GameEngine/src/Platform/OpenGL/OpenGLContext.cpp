@@ -23,6 +23,14 @@ namespace GameEngine {
 		GE_CORE_INFO("	Vendor: {}", (const char*)glGetString(GL_VENDOR));
 		GE_CORE_INFO("	Renderer: {}", (const char*)glGetString(GL_RENDERER));
 		GE_CORE_INFO("	Version: {}", (const char*)glGetString(GL_VERSION));
+
+#		ifdef GE_ENABLE_ASSERTS
+			int versionMajor;
+			int versionMinor;
+			glGetIntegerv(GL_MAJOR_VERSION, &versionMajor);
+			glGetIntegerv(GL_MINOR_VERSION, &versionMinor);
+			GE_CORE_ASSERT(versionMajor > 4 || (versionMajor == 4 && versionMinor >= 5), "Hazel requires at least OpenGL version 4.5!");
+		#endif
 	}
 
 	void OpenGLContext::SwapBuffers()
