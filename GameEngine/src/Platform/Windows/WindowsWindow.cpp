@@ -7,7 +7,7 @@
 
 namespace GameEngine {
 
-	static bool s_GLFWInitialized = false;
+	static uint8_t s_GLFWInitialized = 0;
 
 	static void GLFWErrorCallback(int error, const char* description)
 	{
@@ -21,32 +21,41 @@ namespace GameEngine {
 
 	WindowsWindow::WindowsWindow(const WindowProps& props)
 	{
+		GE_PROFILE_FUNCTION();
+
 		Init(props);
 	}
 
 	WindowsWindow::~WindowsWindow()
 	{
+		GE_PROFILE_FUNCTION();
+
 		Shutdown();
 	}
 
 	void WindowsWindow::Init(const WindowProps& props)
 	{
+		GE_PROFILE_FUNCTION();
+
 		m_Data.Title = props.Title;
 		m_Data.Width = props.Width;
 		m_Data.Height = props.Height;
 
 		GE_CORE_INFO("Creating window {} ({}, {})", props.Title, props.Width, props.Height);
 
-		if(!s_GLFWInitialized)
+		if(s_GLFWInitialized == 0)
 		{
+			GE_PROFILE_SCOPE("glfwInit");
 			int success = glfwInit();
 			GE_CORE_ASSERT(success, "Could not initialize GLFW!");
 			glfwSetErrorCallback(GLFWErrorCallback);
-
-			s_GLFWInitialized = true;
 		}
 
-		m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+		{
+			GE_PROFILE_SCOPE("glfwCreateWindow");
+			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
+			++s_GLFWInitialized;
+		}
 		
 		m_Context = GraphicsContext::Create(m_Window);
 		m_Context->Init();
@@ -148,17 +157,29 @@ namespace GameEngine {
 
 	void WindowsWindow::Shutdown()
 	{
+		GE_PROFILE_FUNCTION();
+
 		glfwDestroyWindow(m_Window);
+		--s_GLFWInitialized;
+
+		if (s_GLFWInitialized == 0)
+		{
+			glfwTerminate();
+		}
 	}
 
 	void WindowsWindow::OnUpdate()
 	{
+		GE_PROFILE_FUNCTION();
+
 		glfwPollEvents();
 		m_Context->SwapBuffers();
 	}
 
 	void WindowsWindow::SetVSync(bool enabled)
 	{
+		GE_PROFILE_FUNCTION();
+
 		if (enabled)
 			glfwSwapInterval(1);
 		else
