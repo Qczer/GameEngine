@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Layer.h"
+#include "GameEngine/Core/Layer.h"
 
 #include "Vector"
 
@@ -9,7 +9,7 @@ namespace GameEngine {
 	class LayerStack
 	{
 	public:
-		LayerStack();
+		LayerStack() = default;
 		~LayerStack();
 
 		void PushLayer(Layer* layer);

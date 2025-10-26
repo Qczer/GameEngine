@@ -1,7 +1,7 @@
 #include "gepch.h"
-#include "Buffer.h"
+#include "GameEngine/Renderer/Buffer.h"
 
-#include "Renderer.h"
+#include "GameEngine/Renderer/Renderer.h"
 
 #include "Platform/OpenGL/OpenGLBuffer.h"
 

@@ -1,9 +1,9 @@
-#include <GameEngine.h>
-#include <GameEngine/Core/EntryPoint.h>
+#include "GameEngine.h"
+#include "GameEngine/Core/EntryPoint.h"
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -24,8 +24,7 @@ public:
 			 0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
 		};
 
-		GameEngine::Ref<GameEngine::VertexBuffer> vertexBuffer;
-		vertexBuffer = GameEngine::VertexBuffer::Create(vertices, sizeof(vertices));
+		GameEngine::Ref<GameEngine::VertexBuffer> vertexBuffer = GameEngine::VertexBuffer::Create(vertices, sizeof(vertices));
 
 		GameEngine::BufferLayout layout = {
 			{ GameEngine::ShaderDataType::Float3, "a_Position" },
@@ -37,8 +36,7 @@ public:
 
 		// Index Buffer
 		uint32_t indices[] = { 0, 1, 2 };
-		GameEngine::Ref<GameEngine::IndexBuffer> indexBuffer;
-		indexBuffer = GameEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+		GameEngine::Ref<GameEngine::IndexBuffer> indexBuffer = GameEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		m_SquareVA = GameEngine::VertexArray::Create();
@@ -50,8 +48,7 @@ public:
 			-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
 		};
 
-		GameEngine::Ref<GameEngine::VertexBuffer> squareVB;
-		squareVB = GameEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
+		GameEngine::Ref<GameEngine::VertexBuffer> squareVB = GameEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 
 		squareVB->SetLayout({
 			{ GameEngine::ShaderDataType::Float3, "a_Position" },
@@ -61,8 +58,7 @@ public:
 
 		// Index Buffer
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-		GameEngine::Ref<GameEngine::IndexBuffer> squareIB;
-		squareIB = GameEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
+		GameEngine::Ref<GameEngine::IndexBuffer> squareIB = GameEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 		std::string vertexSrc = R"(
@@ -136,8 +132,8 @@ public:
 		m_Texture = GameEngine::Texture2D::Create("assets/textures/Rzeki.png");
 		m_ChernoLogoTexture = GameEngine::Texture2D::Create("assets/textures/ChernoLogo.png");
 
-		std::dynamic_pointer_cast<GameEngine::OpenGLShader>(textureShader)->Bind();
-		std::dynamic_pointer_cast<GameEngine::OpenGLShader>(textureShader)->UploadUniformInt("u_Texture", 0);
+		textureShader->Bind();
+		textureShader->SetInt("u_Texture", 0);
 	}
 
 	void OnUpdate(GameEngine::Timestep ts) override
@@ -153,8 +149,8 @@ public:
 
 		glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
-		std::dynamic_pointer_cast<GameEngine::OpenGLShader>(m_FlatColorShader)->Bind();
-		std::dynamic_pointer_cast<GameEngine::OpenGLShader>(m_FlatColorShader)->UploadUniformFloat3("u_Color", m_SquareColor);
+		m_FlatColorShader->Bind();
+		m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
 
 		for (int y = 0; y < 20; y++)
 		{
