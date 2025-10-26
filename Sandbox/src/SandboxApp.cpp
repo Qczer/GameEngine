@@ -25,7 +25,7 @@ public:
 		};
 
 		GameEngine::Ref<GameEngine::VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(GameEngine::VertexBuffer::Create(vertices, sizeof(vertices)));
+		vertexBuffer = GameEngine::VertexBuffer::Create(vertices, sizeof(vertices));
 
 		GameEngine::BufferLayout layout = {
 			{ GameEngine::ShaderDataType::Float3, "a_Position" },
@@ -38,7 +38,7 @@ public:
 		// Index Buffer
 		uint32_t indices[] = { 0, 1, 2 };
 		GameEngine::Ref<GameEngine::IndexBuffer> indexBuffer;
-		indexBuffer.reset(GameEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		indexBuffer = GameEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		m_SquareVA = GameEngine::VertexArray::Create();
@@ -51,7 +51,7 @@ public:
 		};
 
 		GameEngine::Ref<GameEngine::VertexBuffer> squareVB;
-		squareVB.reset(GameEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices)));
+		squareVB = GameEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 
 		squareVB->SetLayout({
 			{ GameEngine::ShaderDataType::Float3, "a_Position" },
@@ -62,7 +62,7 @@ public:
 		// Index Buffer
 		uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
 		GameEngine::Ref<GameEngine::IndexBuffer> squareIB;
-		squareIB.reset(GameEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t)));
+		squareIB = GameEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
 		m_SquareVA->SetIndexBuffer(squareIB);
 
 		std::string vertexSrc = R"(
