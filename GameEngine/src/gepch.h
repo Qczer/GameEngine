@@ -19,6 +19,7 @@
 #include <unordered_set>
 
 #include "GameEngine/Core/Log.h"
+#include "GameEngine/Core/Timer.h"
 
 
 #ifdef GE_PLATFORM_WINDOWS

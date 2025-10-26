@@ -6,6 +6,7 @@
 #include "GameEngine/Core/Layer.h"
 #include "GameEngine/Core/Log.h"
 
+#include "GameEngine/Core/Timer.h"
 #include "GameEngine/Core/Timestep.h"
 
 #include "GameEngine/Core/Input.h"
