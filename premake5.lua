@@ -78,7 +78,6 @@ project "GameEngine"
 
 		defines
 		{
-			"GE_BUILD_DLL",
 			"GLFW_INCLUDE_NONE"
 		}
 

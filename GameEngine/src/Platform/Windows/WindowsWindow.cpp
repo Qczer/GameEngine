@@ -1,6 +1,8 @@
 #include "gepch.h"
 #include "Platform/Windows/WindowsWindow.h"
 
+#include "GameEngine/Renderer/Renderer.h"
+
 #include "GameEngine/Events/ApplicationEvent.h"
 #include "GameEngine/Events/MouseEvent.h"
 #include "GameEngine/Events/KeyEvent.h"
@@ -53,6 +55,10 @@ namespace GameEngine {
 
 		{
 			GE_PROFILE_SCOPE("glfwCreateWindow");
+			#if defined(GE_BUILD_DEBUG)
+				if (RendererAPI::GetAPI() == RendererAPI::API::OpenGL)
+					glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+			#endif
 			m_Window = glfwCreateWindow((int)props.Width, (int)props.Height, m_Data.Title.c_str(), nullptr, nullptr);
 			++s_GLFWInitialized;
 		}
