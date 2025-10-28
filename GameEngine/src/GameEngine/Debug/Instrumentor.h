@@ -6,6 +6,7 @@
 #include <iomanip>
 #include <string>
 #include <thread>
+#include <filesystem>
 
 namespace GameEngine {
 
@@ -47,6 +48,21 @@ namespace GameEngine {
 				if (Log::GetCoreLogger())
 					GE_CORE_ERROR("Instrumentor::BeginSession('{0}') when session '{1}' already open.", name, m_CurrentSession->Name);
 				InternalEndSession();
+			}
+
+			std::filesystem::path path(filepath);
+			std::filesystem::path dir = path.parent_path();
+
+			if (!dir.empty() && !std::filesystem::exists(dir))
+			{
+				try {
+					std::filesystem::create_directories(dir);
+				}
+				catch (const std::filesystem::filesystem_error& e) {
+					if (Log::GetCoreLogger())
+						GE_CORE_ERROR("Instrumentor failed to create directory '{}': {}", dir.string(), e.what());
+					return;
+				}
 			}
 
 			m_OutputStream.open(filepath);
