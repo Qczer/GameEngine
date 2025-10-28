@@ -163,7 +163,7 @@ namespace GameEngine {
 	};
 }
 
-#define GE_PROFILE 1
+#define GE_PROFILE 0
 #if GE_PROFILE
 	// Resolve which function signature macro will be used. Note that this only
 	// is resolved when the (pre)compiler starts, so the syntax highlighting
@@ -184,7 +184,7 @@ namespace GameEngine {
 		#define GE_FUNC_SIG __func__
 	#else
 		#define GE_FUNC_SIG "GE_FUNC_SIG unknown!"
-#endif
+	#endif
 
 	#define GE_PROFILE_BEGIN_SESSION(name, filepath)	::GameEngine::Instrumentor::Get().BeginSession(name, filepath)
 	#define GE_PROFILE_END_SESSION()					::GameEngine::Instrumentor::Get().EndSession()
