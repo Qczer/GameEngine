@@ -116,7 +116,7 @@ ExampleLayer::ExampleLayer()
 
 	auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
-	m_Texture = GameEngine::Texture2D::Create("assets/textures/Rzeki.png");
+	m_Texture = GameEngine::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_ChernoLogoTexture = GameEngine::Texture2D::Create("assets/textures/ChernoLogo.png");
 
 	textureShader->Bind();
