@@ -45,11 +45,22 @@
 
 #ifdef GE_BUILD_DEBUG
 	#define GE_ENABLE_ASSERTS
+	#if defined(GE_PLATFORM_WINDOWS)
+		#define GE_DEBUGBREAK() __debugbreak()
+	#elif defined(GE_PLATFORM_LINUX)
+		#include <signal.h>
+		#define GE_DEBUGBREAK() raise(SIGTRAP)
+	#else
+		#error "Platform doesn't support debugbreak yet!"
+	#endif
+	#define HZ_ENABLE_ASSERTS
+#else
+	#define HZ_DEBUGBREAK()
 #endif
 
 #ifdef GE_ENABLE_ASSERTS
-	#define GE_ASSERT(x, ...) { if(!(x)) { GE_ERROR("Assertion Failed: {}", __VA_ARGS__); __debugbreak(); } }
-	#define GE_CORE_ASSERT(x, ...) { if(!(x)) { GE_CORE_ERROR("Assertion Failed: {}", __VA_ARGS__); __debugbreak(); } }
+	#define GE_ASSERT(x, ...) { if(!(x)) { GE_ERROR("Assertion Failed: {}", __VA_ARGS__); GE_DEBUGBREAK(); } }
+	#define GE_CORE_ASSERT(x, ...) { if(!(x)) { GE_CORE_ERROR("Assertion Failed: {}", __VA_ARGS__); GE_DEBUGBREAK(); } }
 #else
 	#define GE_ASSERT(x, ...)
 	#define GE_CORE_ASSERT(x, ...)

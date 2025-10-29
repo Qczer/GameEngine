@@ -90,14 +90,11 @@ namespace GameEngine {
 		{
 			std::stringstream json;
 
-			std::string name = result.Name;
-			std::replace(name.begin(), name.end(), '"', '\'');
-
 			json << std::setprecision(3) << std::fixed;
 			json << "{";
 			json << "\"cat\":\"function\",";
 			json << "\"dur\":" << (result.ElapsedTime.count()) << ',';
-			json << "\"name\":\"" << name << "\",";
+			json << "\"name\":\"" << result.Name << "\",";
 			json << "\"ph\":\"X\",";
 			json << "\"pid\":0,";
 			json << "\"tid\":" << result.ThreadID << ",";
@@ -132,7 +129,8 @@ namespace GameEngine {
 
 		// Note: you must already own lock on m_Mutex before
 		// calling InternalEndSession()
-		void InternalEndSession() {
+		void InternalEndSession()
+		{
 			if (m_CurrentSession)
 			{
 				WriteFooter();
