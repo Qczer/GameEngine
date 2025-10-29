@@ -18,6 +18,13 @@ namespace GameEngine {
 		float TilingFactor;
 	};
 
+	struct QuadInstance
+	{
+		glm::vec3 Translation;
+		glm::vec2 Scale;
+		float Rotation;
+	};
+
 	struct Renderer2DData
 	{
 		static const uint32_t MaxQuads = 10000;
@@ -27,12 +34,15 @@ namespace GameEngine {
 
 		Ref<VertexArray> QuadVertexArray;
 		Ref<VertexBuffer> QuadVertexBuffer;
+		Ref<VertexBuffer> QuadInstanceBuffer;
 		Ref<Shader> TextureShader;
 		Ref<Texture2D> WhiteTexture;
 
 		uint32_t QuadIndexCount = 0;
 		QuadVertex* QuadVertexBufferBase = nullptr;
 		QuadVertex* QuadVertexBufferPtr = nullptr;
+		QuadInstance* QuadInstanceBufferBase = nullptr;
+		QuadInstance* QuadInstanceBufferPtr = nullptr;
 
 		std::array<Ref<Texture2D>, MaxTextureSlots> TextureSlots;
 		uint32_t TextureSlotIndex = 1; // 0 = white texture
@@ -65,7 +75,16 @@ namespace GameEngine {
 		});
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
 
+		s_Data.QuadInstanceBuffer = VertexBuffer::Create(s_Data.MaxQuads * sizeof(QuadInstance));
+		s_Data.QuadInstanceBuffer->SetLayout({
+			{ ShaderDataType::Float3, "i_Translation" },
+			{ ShaderDataType::Float2, "i_Scale" },
+			{ ShaderDataType::Float,  "i_Rotation" }
+			});
+		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadInstanceBuffer, 1);
+
 		s_Data.QuadVertexBufferBase = new QuadVertex[s_Data.MaxVertices];
+		s_Data.QuadInstanceBufferBase = new QuadInstance[s_Data.MaxQuads];
 
 		uint32_t* quadIndices = new uint32_t[s_Data.MaxIndices];
 
@@ -83,9 +102,13 @@ namespace GameEngine {
 			offset += 4;
 		}
 
-		Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
+		/*Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, s_Data.MaxIndices);
 		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
-		delete[] quadIndices;
+		delete[] quadIndices;*/
+
+		uint32_t quadIndices[6] = { 0, 1, 2, 2, 3, 0 };
+		Ref<IndexBuffer> quadIB = IndexBuffer::Create(quadIndices, 6);
+		s_Data.QuadVertexArray->SetIndexBuffer(quadIB);
 
 		s_Data.WhiteTexture = Texture2D::Create(1, 1);
 		uint32_t whiteTextureData = 0xffffffff;
@@ -95,7 +118,7 @@ namespace GameEngine {
 		for (int32_t i = 0; i < s_Data.MaxTextureSlots; i++)
 			samplers[i] = i;
 
-		s_Data.TextureShader = Shader::Create("assets/shaders/Texture.glsl");
+		s_Data.TextureShader = Shader::Create("assets/shaders/FastTexture.glsl");
 		s_Data.TextureShader->Bind();
 		s_Data.TextureShader->SetIntArray("u_Textures", samplers, s_Data.MaxTextureSlots);
 
@@ -107,6 +130,7 @@ namespace GameEngine {
 		GE_PROFILE_FUNCTION();
 
 		delete[] s_Data.QuadVertexBufferBase;
+		delete[] s_Data.QuadInstanceBufferBase;
 	}
 
 	void Renderer2D::BeginScene(const OrthographicCamera& camera)
@@ -118,6 +142,7 @@ namespace GameEngine {
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		s_Data.QuadInstanceBufferPtr = s_Data.QuadInstanceBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
 	}
@@ -130,6 +155,11 @@ namespace GameEngine {
 		GE_CORE_ASSERT(diff <= UINT32_MAX, "Buffer size too large!");
 		uint32_t dataSize = static_cast<uint32_t>(diff);
 		s_Data.QuadVertexBuffer->SetData(s_Data.QuadVertexBufferBase, dataSize);
+
+		diff = (uint8_t*)s_Data.QuadInstanceBufferPtr - (uint8_t*)s_Data.QuadInstanceBufferBase;
+		GE_CORE_ASSERT(diff <= UINT32_MAX, "Buffer size too large!");
+		dataSize = static_cast<uint32_t>(diff);
+		s_Data.QuadInstanceBuffer->SetData(s_Data.QuadInstanceBufferBase, dataSize);
 
 		Flush();
 	}
@@ -152,6 +182,7 @@ namespace GameEngine {
 
 		s_Data.QuadIndexCount = 0;
 		s_Data.QuadVertexBufferPtr = s_Data.QuadVertexBufferBase;
+		s_Data.QuadInstanceBufferPtr = s_Data.QuadInstanceBufferBase;
 
 		s_Data.TextureSlotIndex = 1;
 	}
@@ -169,22 +200,24 @@ namespace GameEngine {
 			FlushAndReset();
 
 		constexpr size_t quadVertexCount = 4;
-		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		constexpr glm::vec2 textureCoords[] = { {0,0}, {1,0}, {1,1}, {0,1} };
 		constexpr float textureIndex = 0.0f;
 		constexpr float tilingFactor = 1.0f;
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr->Position = s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = color;
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
 			s_Data.QuadVertexBufferPtr++;
 		}
+
+		s_Data.QuadInstanceBufferPtr->Translation = position;
+		s_Data.QuadInstanceBufferPtr->Scale = size;
+		s_Data.QuadInstanceBufferPtr->Rotation = 0.0f;
+		s_Data.QuadInstanceBufferPtr++;
 
 		s_Data.QuadIndexCount += 6;
 
@@ -204,7 +237,7 @@ namespace GameEngine {
 			FlushAndReset();
 
 		constexpr size_t quadVertexCount = 4;
-		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		constexpr glm::vec2 textureCoords[] = { {0,0}, {1,0}, {1,1}, {0,1} };
 
 		float textureIndex = 0.0f;
 
@@ -228,18 +261,20 @@ namespace GameEngine {
 			s_Data.TextureSlotIndex++;
 		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr->Position = s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = tint;
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
 			s_Data.QuadVertexBufferPtr++;
 		}
+
+		s_Data.QuadInstanceBufferPtr->Translation = position;
+		s_Data.QuadInstanceBufferPtr->Scale = size;
+		s_Data.QuadInstanceBufferPtr->Rotation = 0.0f;
+		s_Data.QuadInstanceBufferPtr++;
 
 		s_Data.QuadIndexCount += 6;
 
@@ -261,21 +296,22 @@ namespace GameEngine {
 		constexpr float textureIndex = 0.0f;
 		constexpr float tilingFactor = 1.0f;
 		constexpr size_t quadVertexCount = 4;
-		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
+		constexpr glm::vec2 textureCoords[] = { {0,0}, {1,0}, {1,1}, {0,1} };
 
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr->Position = s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = color;
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
 			s_Data.QuadVertexBufferPtr->TilingFactor = tilingFactor;
 			s_Data.QuadVertexBufferPtr++;
 		}
+
+		s_Data.QuadInstanceBufferPtr->Translation = position;
+		s_Data.QuadInstanceBufferPtr->Scale = size;
+		s_Data.QuadInstanceBufferPtr->Rotation = glm::radians(rotation);
+		s_Data.QuadInstanceBufferPtr++;
 
 		s_Data.QuadIndexCount += 6;
 
@@ -295,7 +331,7 @@ namespace GameEngine {
 			FlushAndReset();
 
 		constexpr size_t quadVertexCount = 4;
-		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+		constexpr glm::vec2 textureCoords[] = { {0,0}, {1,0}, {1,1}, {0,1} };
 
 		float textureIndex = 0.0f;
 
@@ -319,13 +355,9 @@ namespace GameEngine {
 			s_Data.TextureSlotIndex++;
 		}
 
-		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
-			* glm::rotate(glm::mat4(1.0f), glm::radians(rotation), { 0.0f, 0.0f, 1.0f })
-			* glm::scale(glm::mat4(1.0f), { size.x, size.y, 1.0f });
-
 		for (size_t i = 0; i < quadVertexCount; i++)
 		{
-			s_Data.QuadVertexBufferPtr->Position = transform * s_Data.QuadVertexPositions[i];
+			s_Data.QuadVertexBufferPtr->Position = s_Data.QuadVertexPositions[i];
 			s_Data.QuadVertexBufferPtr->Color = tint;
 			s_Data.QuadVertexBufferPtr->TexCoord = textureCoords[i];
 			s_Data.QuadVertexBufferPtr->TexIndex = textureIndex;
@@ -333,9 +365,14 @@ namespace GameEngine {
 			s_Data.QuadVertexBufferPtr++;
 		}
 
+		s_Data.QuadInstanceBufferPtr->Translation = position;
+		s_Data.QuadInstanceBufferPtr->Scale = size;
+		s_Data.QuadInstanceBufferPtr->Rotation = glm::radians(rotation);
+		s_Data.QuadInstanceBufferPtr++;
+
 		s_Data.QuadIndexCount += 6;
 
-		s_Data.Stats.QuadCount ++;
+		s_Data.Stats.QuadCount++;
 	}
 
 	void Renderer2D::ResetStats()

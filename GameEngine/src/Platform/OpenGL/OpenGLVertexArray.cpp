@@ -54,7 +54,7 @@ namespace GameEngine {
 		glBindVertexArray(0);
 	}
 
-	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer)
+	void OpenGLVertexArray::AddVertexBuffer(const Ref<VertexBuffer>& vertexBuffer, int divisor)
 	{
 		GE_PROFILE_FUNCTION();
 
@@ -63,7 +63,6 @@ namespace GameEngine {
 		glBindVertexArray(m_RendererID);
 		vertexBuffer->Bind();
 
-		uint32_t index = 0;
 		const auto& layout = vertexBuffer->GetLayout();
 		for (const auto& element : layout)
 		{
@@ -85,6 +84,8 @@ namespace GameEngine {
 						element.Normalized ? GL_TRUE : GL_FALSE,
 						layout.GetStride(),
 						(const void*)element.Offset);
+					if (divisor > 0)
+						glVertexAttribDivisor(m_VertexBufferIndex, divisor);
 					m_VertexBufferIndex++;
 					break;
 				case ShaderDataType::Mat3:
@@ -100,7 +101,8 @@ namespace GameEngine {
 							element.Normalized ? GL_TRUE : GL_FALSE,
 							layout.GetStride(),
 							(const void*)(sizeof(float) * count * i));
-						glVertexAttribDivisor(m_VertexBufferIndex, 1);
+						if (divisor > 0)
+							glVertexAttribDivisor(m_VertexBufferIndex, divisor);
 						m_VertexBufferIndex++;
 					}
 					break;

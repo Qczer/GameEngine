@@ -114,7 +114,7 @@ ExampleLayer::ExampleLayer()
 
 	m_FlatColorShader = GameEngine::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentSrc);
 
-	auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
+	auto textureShader = m_ShaderLibrary.Load("assets/shaders/FastTexture.glsl");
 
 	m_Texture = GameEngine::Texture2D::Create("assets/textures/Checkerboard.png");
 	m_ChernoLogoTexture = GameEngine::Texture2D::Create("assets/textures/ChernoLogo.png");
