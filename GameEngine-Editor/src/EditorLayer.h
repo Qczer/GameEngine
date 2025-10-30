@@ -13,11 +13,11 @@ namespace GameEngine {
 		virtual void OnAttach() override;
 		virtual void OnDetach() override;
 
-		void OnUpdate(GameEngine::Timestep ts) override;
+		void OnUpdate(Timestep ts) override;
 		virtual void OnImGuiRender() override;
-		void OnEvent(GameEngine::Event& e) override;
+		void OnEvent(Event& e) override;
 	private:
-		GameEngine::OrthographicCameraController m_CameraController;
+		OrthographicCameraController m_CameraController;
 
 		// Temp
 		Ref<VertexArray> m_SquareVA;
@@ -26,9 +26,11 @@ namespace GameEngine {
 
 		Ref<Texture2D> m_Texture;
 
+		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
+
 		glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };
 
-		float m_FrameRate;
+		float m_FrameRate = 0.0f;
 	};
 
 }
