@@ -10,7 +10,7 @@ bin-int/
 Sandbox/profiling/
 
 ## Ignore ImGui windows position files
-Sandbox/imgui.ini
+imgui.ini
 
 ## Important for the premake binary
 !vendor/bin/premake/

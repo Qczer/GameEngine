@@ -27,7 +27,6 @@ group "Dependencies"
 	include "GameEngine/vendor/GLFW"
 	include "GameEngine/vendor/Glad"
 	include "GameEngine/vendor/imgui"
-
 group ""
 
 project "GameEngine"
@@ -103,6 +102,7 @@ project "Sandbox"
 	location "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
+	cppdialect "C++23"
 	staticruntime "on"
 
 	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
@@ -128,7 +128,56 @@ project "Sandbox"
 	}
 
 	filter "system:windows"
-		cppdialect "C++23"
+		systemversion "latest"
+
+	filter "configurations:Debug"
+		defines "GE_BUILD_DEBUG"
+		runtime "Debug"
+		symbols "on"
+
+	filter "configurations:Release"
+		defines "GE_BUILD_RELEASE"
+		runtime "Release"
+		optimize "on"
+
+	filter "configurations:Dist"
+		defines "GE_BUILD_DIST"
+		runtime "Release"
+		optimize "on"
+
+	filter "action:vs*"
+		buildoptions { "/utf-8" }
+
+project "GameEngine-Editor"
+	location "GameEngine-Editor"
+	kind "ConsoleApp"
+	language "C++"
+	cppdialect "C++23"
+	staticruntime "on"
+
+	targetdir ("%{wks.location}/bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("%{wks.location}/bin-int/" .. outputdir .. "/%{prj.name}")
+
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.cpp"
+	}
+
+	includedirs
+	{
+		"GameEngine/vendor/spdlog/include",
+		"GameEngine/src",
+		"GameEngine/vendor",
+		"%{IncludeDir.glm}"
+	}
+
+	links
+	{
+		"GameEngine"
+	}
+
+	filter "system:windows"
 		systemversion "latest"
 
 	filter "configurations:Debug"
