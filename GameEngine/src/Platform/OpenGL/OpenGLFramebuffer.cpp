@@ -27,6 +27,12 @@ namespace GameEngine {
 			glDeleteTextures(1, &m_DepthAttachment);
 		}
 
+		if (m_Specification.Width == 0 || m_Specification.Height == 0)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			return;
+		}
+
 		glCreateFramebuffers(1, &m_RendererID);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_RendererID);
 
