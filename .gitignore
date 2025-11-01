@@ -15,6 +15,9 @@ imgui.ini
 ## Important for the premake binary
 !vendor/bin/premake/
 
+# Game Engine files
+*.log
+
 # Not needed because of premake
 *.sln
 *.vcxproj

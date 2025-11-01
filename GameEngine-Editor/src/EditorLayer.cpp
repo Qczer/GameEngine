@@ -34,6 +34,9 @@ namespace GameEngine {
 	{
 		GE_PROFILE_FUNCTION();
 
+		if (Input::IsKeyPressed(GE_KEY_ESCAPE))
+			Application::Get().Close();
+
 		// Resize
 		if (auto spec = m_Framebuffer->GetSpecification();
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
@@ -44,7 +47,7 @@ namespace GameEngine {
 		}
 
 		// Update
-		if (m_ViewportFocused && m_ViewportHovered)
+		if (m_ViewportFocused)
 			m_CameraController.OnUpdate(ts);
 
 		m_ElapsedTime += ts;
