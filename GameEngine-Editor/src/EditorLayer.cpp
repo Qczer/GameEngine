@@ -44,14 +44,19 @@ namespace GameEngine {
 		}
 
 		// Update
-		m_CameraController.OnUpdate(ts);
-		m_FrameRate = (float)ts;
+		if (m_ViewportFocused && m_ViewportHovered)
+			m_CameraController.OnUpdate(ts);
 
-		auto specs = m_Framebuffer->GetSpecification();
+		m_ElapsedTime += ts;
+		if (m_ElapsedTime >= 0.33f)
+		{
+			m_FrameRate = 1.0f / ts;
+			m_ElapsedTime = 0.0f;
+		}
 
 		// Render
 		Renderer2D::ResetStats();
-		if (specs.Width == 0 || specs.Height == 0)
+		if (m_ViewportSize.x == 0 || m_ViewportSize.y == 0)
 			return;
 
 		{
@@ -136,18 +141,19 @@ namespace GameEngine {
 		}
 
 		ImGui::Begin("Settings");
-
 		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Framerate: %i", (int)(1.0f / m_FrameRate));
+		ImGui::Text("Framerate: %i", (int)(m_FrameRate));
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-
 		ImGui::End();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
+		m_ViewportFocused = ImGui::IsWindowFocused();
+		m_ViewportHovered = ImGui::IsWindowHovered();
+		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
 
 		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
 		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };

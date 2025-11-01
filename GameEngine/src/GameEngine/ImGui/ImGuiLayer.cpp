@@ -57,6 +57,16 @@ namespace GameEngine {
 		ImGui::DestroyContext();
 	}
 
+	void ImGuiLayer::OnEvent(Event& e)
+	{
+		if (m_BlockEvents)
+		{
+			ImGuiIO& io = ImGui::GetIO();
+			e.Handled |= e.isInCategory(EventCategoryMouse) & io.WantCaptureMouse;
+			e.Handled |= e.isInCategory(EventCategoryKeyboard) & io.WantCaptureKeyboard;
+		}
+	}
+
 	void ImGuiLayer::Begin()
 	{
 		GE_PROFILE_FUNCTION();
