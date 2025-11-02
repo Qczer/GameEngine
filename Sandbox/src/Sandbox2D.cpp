@@ -44,10 +44,11 @@ void Sandbox2D::OnUpdate(GameEngine::Timestep ts)
 	}
 
 	{
+		GE_PROFILE_SCOPE("Renderer Draw");
+
 		static float rotation = 0;
 		rotation += ts * 50.0f;
 
-		GE_PROFILE_SCOPE("Renderer Draw");
 		GameEngine::Renderer2D::BeginScene(m_CameraController.GetCamera());
 		GameEngine::Renderer2D::DrawRotatedQuad({ 1.0f, 0.0f }, { 0.8f, 0.8f }, -45.0f, { 0.8f, 0.2f, 0.3f, 1.0f });
 		GameEngine::Renderer2D::DrawQuad({ -1.0f, 0.0f }, { 0.8f, 0.8f }, { 0.8f, 0.2f, 0.3f, 1.0f });

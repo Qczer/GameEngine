@@ -14,7 +14,7 @@ namespace GameEngine {
 		glm::vec3 Position;
 		glm::vec4 Color;
 		glm::vec2 TexCoord;
-		float TexIndex;
+		int TexIndex;
 		float TilingFactor;
 	};
 
@@ -60,7 +60,7 @@ namespace GameEngine {
 			{ ShaderDataType::Float3, "a_Position" },
 			{ ShaderDataType::Float4, "a_Color" },
 			{ ShaderDataType::Float2, "a_TexCoord" },
-			{ ShaderDataType::Float, "a_TexIndex" },
+			{ ShaderDataType::Int, "a_TexIndex" },
 			{ ShaderDataType::Float, "a_TilingFactor" }
 		});
 		s_Data.QuadVertexArray->AddVertexBuffer(s_Data.QuadVertexBuffer);
@@ -170,7 +170,7 @@ namespace GameEngine {
 
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
-		constexpr float textureIndex = 0.0f;
+		constexpr int textureIndex = 0;
 		constexpr float tilingFactor = 1.0f;
 
 		glm::mat4 transform = glm::translate(glm::mat4(1.0f), position)
@@ -206,24 +206,26 @@ namespace GameEngine {
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
-		float textureIndex = 0.0f;
+		int textureIndex = 0;
+
+		
 
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 		{
 			// first gets the pointer of the shared pointers, then dereferences it and compares the actual textures
 			if (*s_Data.TextureSlots[i].get() == *texture.get())
 			{
-				textureIndex = (float)i;
+				textureIndex = i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0.0f)
+		if (textureIndex == 0)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots - 1)
 				FlushAndReset();
 
-			textureIndex = (float)s_Data.TextureSlotIndex;
+			textureIndex = s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 			s_Data.TextureSlotIndex++;
 		}
@@ -258,7 +260,7 @@ namespace GameEngine {
 		if (s_Data.QuadIndexCount >= Renderer2DData::MaxIndices)
 			FlushAndReset();
 
-		constexpr float textureIndex = 0.0f;
+		constexpr int textureIndex = 0;
 		constexpr float tilingFactor = 1.0f;
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
@@ -297,24 +299,24 @@ namespace GameEngine {
 		constexpr size_t quadVertexCount = 4;
 		constexpr glm::vec2 textureCoords[] = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
 
-		float textureIndex = 0.0f;
+		int textureIndex = 0;
 
 		for (uint32_t i = 1; i < s_Data.TextureSlotIndex; i++)
 		{
 			// first gets the pointer of the shared pointers, then dereferences it and compares the actual textures
 			if (*s_Data.TextureSlots[i].get() == *texture.get())
 			{
-				textureIndex = (float)i;
+				textureIndex = i;
 				break;
 			}
 		}
 
-		if (textureIndex == 0.0f)
+		if (textureIndex == 0)
 		{
 			if (s_Data.TextureSlotIndex >= Renderer2DData::MaxTextureSlots - 1)
 				FlushAndReset();
 
-			textureIndex = (float)s_Data.TextureSlotIndex;
+			textureIndex = s_Data.TextureSlotIndex;
 			s_Data.TextureSlots[s_Data.TextureSlotIndex] = texture;
 			s_Data.TextureSlotIndex++;
 		}
