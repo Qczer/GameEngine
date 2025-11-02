@@ -24,11 +24,8 @@ namespace GameEngine {
 
 		m_ActiveScene = CreateRef<Scene>();
 
-		auto square = m_ActiveScene->CreateEntity();
-		m_ActiveScene->Reg().emplace<TransformComponent>(square);
-		m_ActiveScene->Reg().emplace<SpriteRendererComponent>(square, glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
-
-		m_SquareEntity = square;
+		m_SquareEntity = m_ActiveScene->CreateEntity("Green Square");
+		m_SquareEntity.AddComponent<SpriteRendererComponent>(glm::vec4{ 0.0f, 1.0f, 0.0f, 1.0f });
 	}
 
 	void EditorLayer::OnDetach()
@@ -138,8 +135,16 @@ namespace GameEngine {
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
 		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
 
-		auto& squareColor = m_ActiveScene->Reg().get<SpriteRendererComponent>(m_SquareEntity).Color;
-		ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+		if (m_SquareEntity)
+		{
+			auto& squareTag = m_SquareEntity.GetComponent<TagComponent>().Tag;
+			auto& squareColor = m_SquareEntity.GetComponent<SpriteRendererComponent>().Color;
+
+			ImGui::Separator();
+			ImGui::Text("%s", squareTag.c_str());
+
+			ImGui::ColorEdit4("Square Color", glm::value_ptr(squareColor));
+		}
 
 		ImGui::End();
 

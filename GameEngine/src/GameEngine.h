@@ -17,6 +17,7 @@
 #include "GameEngine/Imgui/ImGuiLayer.h"
 
 #include "GameEngine/Scene/Scene.h"
+#include "GameEngine/Scene/Entity.h"
 #include "GameEngine/Scene/Components.h"
 
 // ---Renderer--------------------
