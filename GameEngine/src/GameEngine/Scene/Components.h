@@ -1,5 +1,8 @@
 #pragma once
 
+#include "GameEngine/Renderer/OrthographicCamera.h"
+#include "GameEngine/Renderer/Camera.h"
+
 #include <glm/glm.hpp>
 
 namespace GameEngine {
@@ -37,6 +40,17 @@ namespace GameEngine {
 			: Color(color) {}
 		SpriteRendererComponent(float r, float g, float b, float a)
 			: Color(r, g, b, a) {}
+	};
+
+	struct CameraComponent
+	{
+		GameEngine::Camera Camera;
+		bool Primary = true; // TODO: Think about moving to Scene
+
+		CameraComponent() = default;
+		CameraComponent(const CameraComponent&) = default;
+		CameraComponent(const glm::mat4& projection)
+			: Camera(projection) {}
 	};
 
 }
