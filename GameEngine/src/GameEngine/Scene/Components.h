@@ -2,6 +2,7 @@
 
 #include "GameEngine/Renderer/OrthographicCamera.h"
 #include "GameEngine/Renderer/Camera.h"
+#include "GameEngine/Scene/SceneCamera.h"
 
 #include <glm/glm.hpp>
 
@@ -44,13 +45,12 @@ namespace GameEngine {
 
 	struct CameraComponent
 	{
-		GameEngine::Camera Camera;
+		SceneCamera Camera;
 		bool Primary = true; // TODO: Think about moving to Scene
+		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
-		CameraComponent(const glm::mat4& projection)
-			: Camera(projection) {}
 	};
 
 }
