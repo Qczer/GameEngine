@@ -1,8 +1,7 @@
 #pragma once
 
-#include "GameEngine/Renderer/OrthographicCamera.h"
-#include "GameEngine/Renderer/Camera.h"
 #include "GameEngine/Scene/SceneCamera.h"
+#include "GameEngine/Scene/ScriptableEntity.h"
 
 #include <glm/glm.hpp>
 
@@ -51,6 +50,21 @@ namespace GameEngine {
 
 		CameraComponent() = default;
 		CameraComponent(const CameraComponent&) = default;
+	};
+
+	struct NativeScriptComponent
+	{
+		ScriptableEntity* Instance = nullptr;
+
+		ScriptableEntity* (*InstantiateScript)();
+		void (*DestroyScript)(NativeScriptComponent*);
+
+		template<typename T>
+		void Bind()
+		{
+			InstantiateScript = []() { return static_cast<ScriptableEntity*>(new T()); };
+			DestroyScript = [](NativeScriptComponent* nsc) { delete nsc->Instance; nsc->Instance = nullptr; };
+		}
 	};
 
 }
