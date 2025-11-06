@@ -9,6 +9,8 @@
 bin-int/
 profiling/
 
+**/Makefile
+
 ## Ignore ImGui windows position files
 imgui.ini
 
@@ -24,6 +26,7 @@ imgui.ini
 *.vcxproj.filters
 *.vcxproj.user
 *.hint
+*.idea
 
 # User-specific files
 *.rsuser

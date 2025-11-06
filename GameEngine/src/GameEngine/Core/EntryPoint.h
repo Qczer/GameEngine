@@ -2,7 +2,7 @@
 
 #include "GameEngine/Core/Core.h"
 
-#ifdef GE_PLATFORM_WINDOWS
+#if defined(GE_PLATFORM_WINDOWS) || defined(GE_PLATFORM_LINUX)
 
 extern GameEngine::Application* GameEngine::CreateApplication();
 

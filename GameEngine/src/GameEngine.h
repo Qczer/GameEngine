@@ -14,7 +14,7 @@
 #include "GameEngine/Core/KeyCodes.h"
 #include "GameEngine/Core/MouseCodes.h"
 
-#include "GameEngine/Imgui/ImGuiLayer.h"
+#include "GameEngine/ImGui/ImGuiLayer.h"
 
 #include "GameEngine/Scene/Scene.h"
 #include "GameEngine/Scene/Entity.h"

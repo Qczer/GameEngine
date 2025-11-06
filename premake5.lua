@@ -70,16 +70,37 @@ project "GameEngine"
 	{
 		"GLFW",
 		"Glad",
-		"ImGui",
-		"opengl32.lib"
+		"ImGui"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
 
+		links
+		{
+			"opengl32.lib"
+		}
+
 		defines
 		{
 			"GLFW_INCLUDE_NONE"
+		}
+
+	filter "system:linux"
+		links
+		{
+			"GL",
+			"pthread",
+			"dl",
+			"GLFW",
+			"Glad",
+			"ImGui",
+            "X11",
+            "Xrandr",
+            "Xi",
+            "Xxf86vm",
+            "Xinerama",
+            "Xcursor"
 		}
 
 	filter "configurations:Debug"
@@ -127,11 +148,30 @@ project "Sandbox"
 
 	links
 	{
-		"GameEngine"
+		"GameEngine",
+		"GLFW",
+        "Glad",
+        "ImGui",
+        "X11",
+        "Xrandr",
+        "Xi",
+        "Xxf86vm",
+        "Xinerama",
+        "Xcursor"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
+        postbuildcommands
+        {
+            "{COPYDIR} \"assets\" \"%{cfg.targetdir}/assets\""
+        }
+
+    filter "system:linux"
+        postbuildcommands
+        {
+            "mkdir -p %{cfg.targetdir}/assets && cp -r assets/* %{cfg.targetdir}/assets/"
+        }
 
 	filter "configurations:Debug"
 		defines "GE_BUILD_DEBUG"
@@ -178,11 +218,30 @@ project "GameEngine-Editor"
 
 	links
 	{
-		"GameEngine"
+		"GameEngine",
+		"GLFW",
+        "Glad",
+        "ImGui",
+        "X11",
+        "Xrandr",
+        "Xi",
+        "Xxf86vm",
+        "Xinerama",
+        "Xcursor"
 	}
 
 	filter "system:windows"
 		systemversion "latest"
+		postbuildcommands
+        {
+            "{COPYDIR} \"assets\" \"%{cfg.targetdir}/assets\""
+        }
+
+    filter "system:linux"
+        postbuildcommands
+        {
+            "mkdir -p %{cfg.targetdir}/assets && cp -r assets/* %{cfg.targetdir}/assets/"
+        }
 
 	filter "configurations:Debug"
 		defines "GE_BUILD_DEBUG"
