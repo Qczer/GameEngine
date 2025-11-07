@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameEngine/Core/Core.h"
+#include "GameEngine/Core/Application.h"
 
 #if defined(GE_PLATFORM_WINDOWS) || defined(GE_PLATFORM_LINUX)
 

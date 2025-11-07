@@ -46,8 +46,12 @@ project "GameEngine"
 
 	files
 	{
-		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.cpp",
+		"%{prj.name}/src/*.cpp",
+		"%{prj.name}/src/*.h",
+		"%{prj.name}/src/GameEngine/**.h",
+		"%{prj.name}/src/GameEngine/**.cpp",
+		"%{prj.name}/src/Platform/OpenGL/**.h",
+		"%{prj.name}/src/Platform/OpenGL/**.cpp",
 		"%{prj.name}/vendor/stb_image/**.h",
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
@@ -86,6 +90,12 @@ project "GameEngine"
 			"GLFW_INCLUDE_NONE"
 		}
 
+		files
+		{
+			"%{prj.name}/src/Platform/Windows/**.h",
+			"%{prj.name}/src/Platform/Windows/**.cpp",
+		}
+
 	filter "system:linux"
 		links
 		{
@@ -101,6 +111,12 @@ project "GameEngine"
             "Xxf86vm",
             "Xinerama",
             "Xcursor"
+		}
+
+		files
+		{
+			"%{prj.name}/src/Platform/Linux/**.h",
+			"%{prj.name}/src/Platform/Linux/**.cpp",
 		}
 
 	filter "configurations:Debug"
@@ -151,13 +167,7 @@ project "Sandbox"
 		"GameEngine",
 		"GLFW",
         "Glad",
-        "ImGui",
-        "X11",
-        "Xrandr",
-        "Xi",
-        "Xxf86vm",
-        "Xinerama",
-        "Xcursor"
+        "ImGui"
 	}
 
 	filter "system:windows"
@@ -168,6 +178,15 @@ project "Sandbox"
         }
 
     filter "system:linux"
+		links
+		{
+			"X11",
+			"Xrandr",
+			"Xi",
+			"Xxf86vm",
+			"Xinerama",
+			"Xcursor"
+		}
         postbuildcommands
         {
             "mkdir -p %{cfg.targetdir}/assets && cp -r assets/* %{cfg.targetdir}/assets/"
@@ -221,13 +240,7 @@ project "GameEngine-Editor"
 		"GameEngine",
 		"GLFW",
         "Glad",
-        "ImGui",
-        "X11",
-        "Xrandr",
-        "Xi",
-        "Xxf86vm",
-        "Xinerama",
-        "Xcursor"
+        "ImGui"
 	}
 
 	filter "system:windows"
@@ -238,6 +251,15 @@ project "GameEngine-Editor"
         }
 
     filter "system:linux"
+		links
+		{
+			"X11",
+			"Xrandr",
+			"Xi",
+			"Xxf86vm",
+			"Xinerama",
+			"Xcursor"
+		}
         postbuildcommands
         {
             "mkdir -p %{cfg.targetdir}/assets && cp -r assets/* %{cfg.targetdir}/assets/"
