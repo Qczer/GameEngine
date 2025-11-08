@@ -17,7 +17,10 @@ namespace GameEngine {
 		T& AddComponent(Args&&... args)
 		{
 			GE_CORE_ASSERT(!HasComponent<T>(), "Entity already has this component!");
-			return m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...); // std::forward passes the args to entt and it takes care of them
+			T& component = m_Scene->m_Registry.emplace<T>(m_EntityHandle, std::forward<Args>(args)...);
+			m_Scene->OnComponentAdded<T>(*this, component);
+
+			return component; // std::forward passes the args to entt and it takes care of them
 		}
 
 		template<typename T>
@@ -41,6 +44,7 @@ namespace GameEngine {
 		}
 
 		operator bool() const { return m_EntityHandle != entt::null; }
+		operator entt::entity() const { return m_EntityHandle; }
 		operator uint32_t() const { return (uint32_t)m_EntityHandle; }
 
 		bool operator==(const Entity& other) { return m_EntityHandle == other.m_EntityHandle && m_Scene == other.m_Scene; }
