@@ -28,13 +28,15 @@ namespace GameEngine {
 		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/static/OpenSans-Bold.ttf", 18.0f);
-		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/static/OpenSans-Regular.ttf", 18.0f);
+		io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/static/OpenSans-Bold.ttf", Window::s_HighDPIScaleFactor * 18.0f);
+		io.FontDefault = io.Fonts->AddFontFromFileTTF("assets/fonts/opensans/static/OpenSans-Regular.ttf", Window::s_HighDPIScaleFactor * 18.0f);
 
 		Application& app = Application::Get();
 		GLFWwindow* window = static_cast<GLFWwindow*>(app.GetWindow().GetNativeWindow());
 
 		ImGuiStyle& style = ImGui::GetStyle();
+
+		style.ScaleAllSizes(Window::s_HighDPIScaleFactor);
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
