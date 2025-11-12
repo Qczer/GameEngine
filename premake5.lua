@@ -23,11 +23,13 @@ IncludeDir["ImGui"] = "%{wks.location}/GameEngine/vendor/imgui"
 IncludeDir["glm"] = "%{wks.location}/GameEngine/vendor/glm"
 IncludeDir["stb_image"] = "%{wks.location}/GameEngine/vendor/stb_image"
 IncludeDir["entt"] = "%{wks.location}/GameEngine/vendor/entt/include"
+IncludeDir["yaml_cpp"] = "%{wks.location}/GameEngine/vendor/yaml-cpp/include"
 
 group "Dependencies"
 	include "GameEngine/vendor/GLFW"
 	include "GameEngine/vendor/Glad"
 	include "GameEngine/vendor/imgui"
+	include "GameEngine/vendor/yaml-cpp"
 group ""
 
 project "GameEngine"
@@ -67,14 +69,21 @@ project "GameEngine"
 		"%{IncludeDir.ImGui}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.yaml_cpp}"
 	}
 
 	links
 	{
 		"GLFW",
 		"Glad",
-		"ImGui"
+		"ImGui",
+		"yaml-cpp"
+	}
+
+	defines
+	{
+		"YAML_CPP_STATIC_DEFINE"
 	}
 
 	filter "system:windows"
@@ -167,7 +176,8 @@ project "Sandbox"
 		"GameEngine",
 		"GLFW",
         "Glad",
-        "ImGui"
+        "ImGui",
+		"yaml-cpp"
 	}
 
 	filter "system:windows"
@@ -240,7 +250,8 @@ project "GameEngine-Editor"
 		"GameEngine",
 		"GLFW",
         "Glad",
-        "ImGui"
+        "ImGui",
+		"yaml-cpp"
 	}
 
 	filter "system:windows"
