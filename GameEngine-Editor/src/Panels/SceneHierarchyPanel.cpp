@@ -119,7 +119,7 @@ namespace GameEngine {
 
         ImGui::Columns(2);
         ImGui::SetColumnWidth(0, columnWidth);
-        ImGui::Text(label.c_str());
+        ImGui::Text("%s", label.c_str());
         ImGui::NextColumn();
 
         ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
@@ -186,7 +186,7 @@ namespace GameEngine {
 
             char buffer[256];
             memset(buffer, 0, sizeof(buffer));
-            strcpy_s(buffer, sizeof(buffer), tag.c_str());
+            strncpy(buffer, tag.c_str(), sizeof(buffer) - 1);
             if (ImGui::InputText("##Tag", buffer, sizeof(buffer)))
             {
                 tag = std::string(buffer);
