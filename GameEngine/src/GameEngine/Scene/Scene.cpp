@@ -100,6 +100,17 @@ namespace GameEngine {
 		}
 	}
 
+	Entity Scene::GetPrimaryCameraEntity()
+	{
+		auto view = m_Registry.view<CameraComponent>();
+		for (auto entity : view)
+		{
+			const auto& cc = view.get<CameraComponent>(entity);
+			if (cc.Primary)
+				return Entity(entity, this);
+		}
+	}
+
 	template <typename T>
 	void Scene::OnComponentAdded(Entity entity, T& component)
 	{

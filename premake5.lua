@@ -24,6 +24,7 @@ IncludeDir["glm"] = "%{wks.location}/GameEngine/vendor/glm"
 IncludeDir["stb_image"] = "%{wks.location}/GameEngine/vendor/stb_image"
 IncludeDir["entt"] = "%{wks.location}/GameEngine/vendor/entt/include"
 IncludeDir["yaml_cpp"] = "%{wks.location}/GameEngine/vendor/yaml-cpp/include"
+IncludeDir["ImGuizmo"] = "%{wks.location}/GameEngine/vendor/ImGuizmo"
 
 group "Dependencies"
 	include "GameEngine/vendor/GLFW"
@@ -58,6 +59,8 @@ project "GameEngine"
 		"%{prj.name}/vendor/stb_image/**.cpp",
 		"%{prj.name}/vendor/glm/glm/**.hpp",
 		"%{prj.name}/vendor/glm/glm/**.inl",
+		"%{prj.name}/vendor/ImGuizmo/*.h",
+		"%{prj.name}/vendor/ImGuizmo/*.cpp"
 	}
 
 	includedirs
@@ -70,7 +73,8 @@ project "GameEngine"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.stb_image}",
 		"%{IncludeDir.entt}",
-		"%{IncludeDir.yaml_cpp}"
+		"%{IncludeDir.yaml_cpp}",
+		"%{IncludeDir.ImGuizmo}"
 	}
 
 	links
@@ -85,6 +89,9 @@ project "GameEngine"
 	{
 		"YAML_CPP_STATIC_DEFINE"
 	}
+
+	filter "files:GameEngine/vendor/ImGuizmo/**.cpp"
+	flags { "NoPCH" }
 
 	filter "system:windows"
 		systemversion "latest"
@@ -242,7 +249,8 @@ project "GameEngine-Editor"
 		"GameEngine/src",
 		"GameEngine/vendor",
 		"%{IncludeDir.glm}",
-		"%{IncludeDir.entt}"
+		"%{IncludeDir.entt}",
+		"%{IncludeDir.ImGuizmo}",
 	}
 
 	links

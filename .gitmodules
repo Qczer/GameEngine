@@ -7,3 +7,6 @@
 [submodule "GameEngine/vendor/glm"]
 	path = GameEngine/vendor/glm
 	url = https://github.com/icaven/glm
+[submodule "GameEngine/vendor/ImGuizmo"]
+	path = GameEngine/vendor/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo
