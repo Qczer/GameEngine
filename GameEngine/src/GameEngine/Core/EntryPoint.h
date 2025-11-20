@@ -3,6 +3,10 @@
 #include "GameEngine/Core/Core.h"
 #include "GameEngine/Core/Application.h"
 
+#ifdef GE_PLATFORM_LINUX
+#include <gtkmm.h>
+#endif
+
 #if defined(GE_PLATFORM_WINDOWS) || defined(GE_PLATFORM_LINUX)
 
 extern GameEngine::Application* GameEngine::CreateApplication();
@@ -10,6 +14,10 @@ extern GameEngine::Application* GameEngine::CreateApplication();
 int main(int argc, char** argv)
 {
 	GameEngine::Log::Init();
+
+	#ifdef GE_PLATFORM_LINUX
+	Gtk::Application::create();
+	#endif
 
 	GE_PROFILE_BEGIN_SESSION("Startup", "profiling/GameEngineProfile-Startup.json");
 	auto app = GameEngine::CreateApplication();

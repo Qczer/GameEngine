@@ -1,3 +1,34 @@
+-- Helper to parse pkg-config output into Premake properties
+function pkg_config(library)
+	-- 1. CFLAGS (Include paths and defines)
+	local cflags = os.outputof("pkg-config --cflags " .. library)
+	if cflags then
+		buildoptions { cflags }
+	end
+
+	-- 2. LIB DIRS (library search paths -L)
+	local libdirs_output = os.outputof("pkg-config --libs-only-L " .. library)
+	if libdirs_output then
+		for dir in string.gmatch(libdirs_output, "-L(%S+)") do
+			libdirs { dir }
+		end
+	end
+
+	-- 3. LIBS (Actual library names -l) -> Put these in 'links' to fix order
+	local libs_output = os.outputof("pkg-config --libs-only-l " .. library)
+	if libs_output then
+		for lib in string.gmatch(libs_output, "-l(%S+)") do
+			links { lib }
+		end
+	end
+
+	-- 4. OTHER (Like -pthread)
+	local other_output = os.outputof("pkg-config --libs-only-other " .. library)
+	if other_output then
+		linkoptions { other_output }
+	end
+end
+
 workspace "GameEngine"
 	architecture "x86_64"
 	startproject "GameEngine-Editor"
@@ -113,6 +144,8 @@ project "GameEngine"
 		}
 
 	filter "system:linux"
+		pkg_config("gtkmm-4.0")
+
 		links
 		{
 			"GL",
@@ -126,7 +159,7 @@ project "GameEngine"
             "Xi",
             "Xxf86vm",
             "Xinerama",
-            "Xcursor"
+            "Xcursor",
 		}
 
 		files
@@ -270,6 +303,8 @@ project "GameEngine-Editor"
         }
 
     filter "system:linux"
+		pkg_config("gtkmm-4.0")
+
 		links
 		{
 			"X11",
@@ -279,6 +314,7 @@ project "GameEngine-Editor"
 			"Xinerama",
 			"Xcursor"
 		}
+
         postbuildcommands
         {
             "mkdir -p %{cfg.targetdir}/assets && cp -r assets/* %{cfg.targetdir}/assets/"

@@ -288,6 +288,8 @@ namespace GameEngine {
 				break;
 			}
 		}
+
+        return false;
 	}
 
 	void EditorLayer::NewScene()
@@ -314,6 +316,7 @@ namespace GameEngine {
 	void EditorLayer::SaveSceneAs()
 	{
 		std::string filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
+		GE_CORE_DEBUG("{}", filepath);
 		if (!filepath.empty())
 		{
 			SceneSerializer serializer(m_ActiveScene);

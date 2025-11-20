@@ -2,37 +2,158 @@
 #include "GameEngine/Utils/PlatformUtils.h"
 #include "GameEngine/Core/Application.h"
 
-#include <gtk/gtk.h>
+#include <gtkmm.h>
+#include <gtkmm/filechoosernative.h>
+
+#include <cstdlib>
+
+#include <cstdio>
+#include <fcntl.h>
+#include <unistd.h>
 
 namespace GameEngine {
 
-    std::string OpenFile(const char* filter)
+    std::string FileDialogs::OpenFile(const char* filter)
     {
-        GtkFileChooserNative *native = gtk_file_chooser_native_new(
-            "Wybierz plik",
-            //Application::GetWindow()->GetNativeWindow(),
-            nullptr,
-            GTK_FILE_CHOOSER_ACTION_OPEN,
-            "_Open",
-            "_Cancel"
-        );
+        // Silencing warning for this function (the library causes the warnings so i cant fix them)
+        int oldStderr = dup(fileno(stderr));
+        freopen("/dev/null", "w", stderr);
 
-        gint res = gtk_native_dialog_run(GTK_NATIVE_DIALOG(native));
+        setenv("GSK_RENDERER", "cairo", 1);
 
-        if (res == GTK_RESPONSE_ACCEPT)
+        if (!Gtk::Application::get_default())
         {
-            char *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(native));
-            g_print("Wybrano: %s\n", filename);
-            g_free(filename);
-
-            g_object_unref(native);
+            if (!gtk_init_check()) {
+                return "";
+            }
         }
 
-        return "";
+        setlocale(LC_NUMERIC, "C");
+
+        auto dialog = Gtk::FileChooserNative::create(
+            "Open File",
+            Gtk::FileChooser::Action::OPEN,
+            "Accept",
+            "Cancel");
+
+        dialog->set_modal(true);
+
+        auto engineFilter = Gtk::FileFilter::create();
+        engineFilter->set_name("GameEngine Scene (*.gameengine)");
+        engineFilter->add_pattern("*.gameengine");
+
+        dialog->add_filter(engineFilter);
+
+        auto allFilter = Gtk::FileFilter::create();
+        allFilter->set_name("All Files");
+        allFilter->add_pattern("*");
+        dialog->add_filter(allFilter);
+
+        dialog->set_filter(engineFilter);
+
+        bool finished = false;
+        int response_id = -1;
+
+        dialog->signal_response().connect([&](int response) {
+            response_id = response;
+            finished = true;
+        });
+
+        dialog->show();
+
+        while (!finished) {
+            // Przetwórz jedno zdarzenie GTK (blocking = true oszczędza CPU)
+            g_main_context_iteration(NULL, TRUE);
+        }
+
+        std::string result = "";
+        if (response_id == Gtk::ResponseType::ACCEPT) {
+            auto file = dialog->get_file();
+            if (file) {
+                result = file->get_path();
+            }
+        }
+
+        dialog->hide();
+        while (g_main_context_iteration(NULL, FALSE));
+
+        setlocale(LC_ALL, "C");
+        std::locale::global(std::locale("C"));
+
+        dup2(oldStderr, fileno(stderr));
+        close(oldStderr);
+
+        return result;
     }
 
-    std::string SaveFile(const char* filter)
+    std::string FileDialogs::SaveFile(const char* filter)
     {
-        return "";
+        // Silencing GTK warnings
+        int oldStderr = dup(fileno(stderr));
+        freopen("/dev/null", "w", stderr);
+
+        setenv("GSK_RENDERER", "cairo", 1);
+
+        if (!Gtk::Application::get_default())
+        {
+            if (!gtk_init_check()) {
+                return "";
+            }
+        }
+
+        setlocale(LC_NUMERIC, "C");
+
+        auto dialog = Gtk::FileChooserNative::create(
+            "Save File",
+            Gtk::FileChooser::Action::SAVE,
+            "Save",
+            "Cancel");
+
+        dialog->set_modal(true);
+
+        auto engineFilter = Gtk::FileFilter::create();
+        engineFilter->set_name("GameEngine Scene (*.gameengine)");
+        engineFilter->add_pattern("*.gameengine");
+        dialog->add_filter(engineFilter);
+
+        auto allFilter = Gtk::FileFilter::create();
+        allFilter->set_name("All Files");
+        allFilter->add_pattern("*");
+        dialog->add_filter(allFilter);
+
+        dialog->set_filter(engineFilter);
+
+        bool finished = false;
+        int response_id = -1;
+
+        dialog->signal_response().connect([&](int response) {
+            response_id = response;
+            finished = true;
+        });
+
+        dialog->show();
+
+        while (!finished) {
+            g_main_context_iteration(NULL, TRUE);
+        }
+
+        std::string result = "";
+        if (response_id == Gtk::ResponseType::ACCEPT) {
+            auto file = dialog->get_file();
+            if (file) {
+                result = file->get_path();
+            }
+        }
+
+        dialog->hide();
+        while (g_main_context_iteration(NULL, FALSE));
+
+        setlocale(LC_ALL, "C");
+        std::locale::global(std::locale("C"));
+
+        dup2(oldStderr, fileno(stderr));
+        close(oldStderr);
+
+        return result;
     }
 }
