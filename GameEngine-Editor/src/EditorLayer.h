@@ -2,7 +2,9 @@
 
 #include "GameEngine.h"
 #include "Panels/SceneHierarchyPanel.h"
+
 #include "GameEngine/Events/KeyEvent.h"
+#include "GameEngine/Renderer/EditorCamera.h"
 
 namespace GameEngine {
 
@@ -32,6 +34,8 @@ namespace GameEngine {
 		Ref<Shader> m_FlatColorShader;
 		Ref<Framebuffer> m_Framebuffer;
 
+		EditorCamera m_EditorCamera;
+
 		Ref<Scene> m_ActiveScene;
 		Ref<Texture2D> m_Texture;
 
@@ -39,6 +43,8 @@ namespace GameEngine {
 		glm::vec2 m_ViewportSize = { 0.0f, 0.0f };
 
 		glm::vec4 m_SquareColor = { 0.2f, 0.3f, 0.8f, 1.0f };
+
+		int m_GuizmoType = 7;
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
