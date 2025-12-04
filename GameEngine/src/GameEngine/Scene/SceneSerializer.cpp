@@ -18,6 +18,7 @@ namespace YAML {
 			node.push_back(rhs.x);
 			node.push_back(rhs.y);
 			node.push_back(rhs.z);
+			node.SetStyle(EmitterStyle::Flow);
 			return node;
 		}
 
@@ -43,6 +44,7 @@ namespace YAML {
 			node.push_back(rhs.y);
 			node.push_back(rhs.z);
 			node.push_back(rhs.w);
+			node.SetStyle(EmitterStyle::Flow);
 			return node;
 		}
 
@@ -157,32 +159,17 @@ namespace GameEngine {
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
-		int entityCount = 0;
 		auto view = m_Scene->m_Registry.view<entt::entity>();
 		for (auto entityID : view) {
 			Entity entity = { entityID, m_Scene.get() };
 			if (!entity)
-				continue;
+				return;
 
 			SerializeEntity(out, entity);
-			entityCount++;
 		}
 
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
-
-		GE_CORE_INFO("--- DEBUG SERIALIZER ---");
-		GE_CORE_INFO("Sciezka: {}", filepath.string().c_str());
-		GE_CORE_INFO("Liczba encji do zapisu: {}", entityCount);
-
-		if (!out.good())
-		{
-			GE_CORE_INFO("BLAD: YAML Emitter jest w zlym stanie! Error: {}", out.GetLastError().c_str());
-			return;
-		}
-		else
-			printf("YAML Emitter OK. Rozmiar danych: %lu bytow.\n", out.c_str() ? strlen(out.c_str()) : 0);
-
 
 		std::ofstream fout(filepath, std::ios::out | std::ios::trunc);
 		if (!fout.is_open()) {
@@ -202,11 +189,7 @@ namespace GameEngine {
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
-		std::ifstream stream(filepath);
-		std::stringstream strStream;
-		strStream << stream.rdbuf();
-
-		YAML::Node data = YAML::Load(strStream.str());
+		YAML::Node data = YAML::LoadFile(filepath);
 		if (!data["Scene"])
 			return false;
 

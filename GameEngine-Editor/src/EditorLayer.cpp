@@ -360,7 +360,6 @@ namespace GameEngine {
 	void EditorLayer::SaveSceneAs()
 	{
 		std::optional<std::string> filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
-		GE_CORE_DEBUG("File path: {}", *filepath);
 		if (filepath)
 		{
 			SceneSerializer serializer(m_ActiveScene);
