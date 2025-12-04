@@ -345,26 +345,26 @@ namespace GameEngine {
 
 	void EditorLayer::OpenScene()
 	{
-		std::string filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
-		if (!filepath.empty())
+		std::optional<std::string> filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
+		if (filepath)
 		{
 			m_ActiveScene = CreateRef<Scene>();
 			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(filepath);
+			serializer.Deserialize(*filepath);
 		}
 	}
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::string filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
-		GE_CORE_DEBUG("{}", filepath);
-		if (!filepath.empty())
+		std::optional<std::string> filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
+		GE_CORE_DEBUG("File path: {}", *filepath);
+		if (filepath)
 		{
 			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(filepath);
+			serializer.Serialize(*filepath);
 		}
 	}
 

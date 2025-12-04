@@ -157,20 +157,41 @@ namespace GameEngine {
 		out << YAML::Key << "Scene" << YAML::Value << "Untitled";
 		out << YAML::Key << "Entities" << YAML::Value << YAML::BeginSeq;
 
+		int entityCount = 0;
 		auto view = m_Scene->m_Registry.view<entt::entity>();
 		for (auto entityID : view) {
 			Entity entity = { entityID, m_Scene.get() };
 			if (!entity)
-				return;
+				continue;
 
 			SerializeEntity(out, entity);
+			entityCount++;
 		}
 
 		out << YAML::EndSeq;
 		out << YAML::EndMap;
 
-		std::ofstream fout(filepath);
+		GE_CORE_INFO("--- DEBUG SERIALIZER ---");
+		GE_CORE_INFO("Sciezka: {}", filepath.string().c_str());
+		GE_CORE_INFO("Liczba encji do zapisu: {}", entityCount);
+
+		if (!out.good())
+		{
+			GE_CORE_INFO("BLAD: YAML Emitter jest w zlym stanie! Error: {}", out.GetLastError().c_str());
+			return;
+		}
+		else
+			printf("YAML Emitter OK. Rozmiar danych: %lu bytow.\n", out.c_str() ? strlen(out.c_str()) : 0);
+
+
+		std::ofstream fout(filepath, std::ios::out | std::ios::trunc);
+		if (!fout.is_open()) {
+			GE_CORE_ERROR("Failed to open file: {}", filepath.string());
+			return;
+		}
+
 		fout << out.c_str();
+		fout.flush();
 	}
 
 	void SceneSerializer::SerializeRuntime(const std::filesystem::path& filepath)

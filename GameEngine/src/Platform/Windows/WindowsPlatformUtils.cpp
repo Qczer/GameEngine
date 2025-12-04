@@ -10,7 +10,7 @@
 
 namespace GameEngine {
 
-	std::string FileDialogs::OpenFile(const char* filter)
+	std::optional<std::string> FileDialogs::OpenFile(const char* filter)
     {
         OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -23,12 +23,15 @@ namespace GameEngine {
         ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
+		// Sets the default extension by extracting it from the filter
+		ofn.lpstrDefExt = strchr(filter, '\0') + 1;
+
         if (GetOpenFileNameA(&ofn))
             return ofn.lpstrFile;
-        return std::string();
+        return std::nullopt;
     }
 
-    std::string FileDialogs::SaveFile(const char* filter)
+    std::optional<std::string> FileDialogs::SaveFile(const char* filter)
     {
 		OPENFILENAMEA ofn;
 		CHAR szFile[260] = { 0 };
@@ -43,6 +46,6 @@ namespace GameEngine {
 
 		if (GetSaveFileNameA(&ofn))
 			return ofn.lpstrFile;
-		return std::string();
+		return std::nullopt;
     }
 }

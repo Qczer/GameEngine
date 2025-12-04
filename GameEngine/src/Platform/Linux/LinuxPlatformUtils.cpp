@@ -13,7 +13,7 @@
 
 namespace GameEngine {
 
-    std::string FileDialogs::OpenFile(const char* filter)
+    std::optional<std::string> FileDialogs::OpenFile(const char* filter)
     {
         // Silencing warning for this function (the library causes the warnings so i cant fix them)
         int oldStderr = dup(fileno(stderr));
@@ -67,10 +67,13 @@ namespace GameEngine {
         }
 
         std::string result = "";
+        bool success = false;
+
         if (response_id == Gtk::ResponseType::ACCEPT) {
             auto file = dialog->get_file();
             if (file) {
                 result = file->get_path();
+                success = true;
             }
         }
 
@@ -83,10 +86,12 @@ namespace GameEngine {
         dup2(oldStderr, fileno(stderr));
         close(oldStderr);
 
-        return result;
+        if (success)
+            return result;
+        return std::nullopt;
     }
 
-    std::string FileDialogs::SaveFile(const char* filter)
+    std::optional<std::string> FileDialogs::SaveFile(const char* filter)
     {
         // Silencing GTK warnings
         int oldStderr = dup(fileno(stderr));
@@ -138,10 +143,13 @@ namespace GameEngine {
         }
 
         std::string result = "";
+        bool success = false;
+
         if (response_id == Gtk::ResponseType::ACCEPT) {
             auto file = dialog->get_file();
             if (file) {
                 result = file->get_path();
+                success = true;
             }
         }
 
@@ -154,6 +162,8 @@ namespace GameEngine {
         dup2(oldStderr, fileno(stderr));
         close(oldStderr);
 
-        return result;
+        if (success)
+            return result;
+        return std::nullopt;
     }
 }
