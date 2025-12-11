@@ -120,9 +120,6 @@ namespace GameEngine {
 
 		m_EditorCamera.OnUpdate(ts);
 
-		GE_CORE_INFO("Hello");
-
-
 		m_Framebuffer->Bind();
 		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
 		RenderCommand::Clear();

@@ -10,6 +10,8 @@
 #include <cstdio>
 #include <fcntl.h>
 #include <unistd.h>
+#include <limits.h>
+#include <filesystem>
 
 namespace GameEngine {
 
@@ -35,6 +37,18 @@ namespace GameEngine {
             Gtk::FileChooser::Action::OPEN,
             "Accept",
             "Cancel");
+
+		#ifdef GE_PROJECT_DIR
+			std::filesystem::path projectDir = GE_PROJECT_DIR;
+			std::filesystem::path startDir = projectDir / "GameEngine-Editor/assets";
+		#else
+			std::filesystem::path startDir = std::filesystem::current_path();
+		#endif
+
+        if (std::filesystem::exists(startDir))
+            dialog->set_current_folder(Gio::File::create_for_path(startDir.string()));
+        else
+            GE_CORE_ERROR("Folder does not exist: {}", startDir.string());
 
         dialog->set_modal(true);
 
@@ -113,6 +127,18 @@ namespace GameEngine {
             Gtk::FileChooser::Action::SAVE,
             "Save",
             "Cancel");
+
+		#ifdef GE_PROJECT_DIR
+			std::filesystem::path projectDir = GE_PROJECT_DIR;
+			std::filesystem::path startDir = projectDir / "GameEngine-Editor/assets";
+		#else
+			std::filesystem::path startDir = std::filesystem::current_path();
+		#endif
+
+        if (std::filesystem::exists(startDir))
+            dialog->set_current_folder(Gio::File::create_for_path(startDir.string()));
+        else
+            GE_CORE_ERROR("Folder does not exist: {}", startDir.string());
 
         dialog->set_modal(true);
 

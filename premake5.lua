@@ -118,7 +118,8 @@ project "GameEngine"
 
 	defines
 	{
-		"YAML_CPP_STATIC_DEFINE"
+		"YAML_CPP_STATIC_DEFINE",
+		"GE_PROJECT_DIR=\"" .. path.getabsolute(".") .. "\""
 	}
 
 	filter "files:GameEngine/vendor/ImGuizmo/**.cpp"
