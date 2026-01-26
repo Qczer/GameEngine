@@ -189,7 +189,7 @@ namespace GameEngine {
 
 	bool SceneSerializer::Deserialize(const std::filesystem::path& filepath)
 	{
-		YAML::Node data = YAML::LoadFile(filepath);
+		YAML::Node data = YAML::LoadFile(filepath.string());
 		if (!data["Scene"])
 			return false;
 
