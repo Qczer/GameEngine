@@ -27,10 +27,11 @@ void main()
 #version 460 core
 
 layout(location = 0) out vec4 color;
+layout(location = 1) out int color2;
 
 in vec4 v_Color;
 in vec2 v_TexCoord;
-flat in int v_TexIndex;
+in flat int v_TexIndex;
 in float v_TilingFactor;
 
 uniform sampler2D u_Textures[32];
@@ -38,4 +39,5 @@ uniform sampler2D u_Textures[32];
 void main()
 {
 	color = texture(u_Textures[v_TexIndex], v_TexCoord * v_TilingFactor) * v_Color;
+	color2 = 50;
 }
