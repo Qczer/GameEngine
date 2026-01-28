@@ -92,10 +92,10 @@ namespace GameEngine {
 		int mouseX = (int)mx;
 		int mouseY = (int)my;
 
-		if (mouseX >= 0 && mouseY >= 0 && mouseX <= (int)viewportSize.x && mouseY <= (int)viewportSize.y)
+		if (mouseX > 0 && mouseY > 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
 			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			GE_CORE_WARN("Pixel data: {}", pixelData);
+			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
 		}
 
 		m_Framebuffer->Unbind();
@@ -168,6 +168,12 @@ namespace GameEngine {
 		m_SceneHierarchyPanel.OnImGuiRender();
 
 		ImGui::Begin("Stats");
+
+		std::string name = "None";
+		if (m_HoveredEntity && m_HoveredEntity.HasComponent<TagComponent>())
+			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
+		ImGui::Text("Hovered Entity: %s (%i)", name.c_str(), (entt::entity)m_HoveredEntity);
+
 		auto stats = Renderer2D::GetStats();
 		ImGui::Text("Framerate: %i", (int)(m_FrameRate));
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
@@ -179,7 +185,11 @@ namespace GameEngine {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 		ImGui::Begin("Viewport");
-		auto viewportOffset = ImGui::GetCursorPos(); // Includes tab bar height
+		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();	
+		auto viewportOffset = ImGui::GetWindowPos();
+		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
 
 		m_ViewportFocused = ImGui::IsWindowFocused();
 		m_ViewportHovered = ImGui::IsWindowHovered();
@@ -191,12 +201,6 @@ namespace GameEngine {
 		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
-		auto windowSize = ImGui::GetWindowSize();
-		ImVec2 minBound = ImGui::GetWindowPos();
-		ImVec2 maxBound = { minBound.x + windowSize.x, minBound.y + windowSize.y };
-		m_ViewportBounds[0] = { minBound.x, minBound.y };
-		m_ViewportBounds[1] = { maxBound.x, maxBound.y };
-
 		// Guizmo
 		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
 		if (selectedEntity)
@@ -206,7 +210,7 @@ namespace GameEngine {
 
 			float windowWidth = (float)ImGui::GetWindowWidth();
 			float windowHeight = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
 			// Camera
 			// auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
@@ -296,16 +300,20 @@ namespace GameEngine {
 
 			// Gizmos
 			case Key::Q:
-				m_GuizmoType = -1;
+				if (!ImGuizmo::IsUsing())
+					m_GuizmoType = -1;
 				break;
 			case Key::W:
-				m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+				if (!ImGuizmo::IsUsing())
+					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
 				break;
 			case Key::E:
-				m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
+				if (!ImGuizmo::IsUsing())
+					m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
 				break;
 			case Key::R:
-				m_GuizmoType = ImGuizmo::OPERATION::SCALE;
+				if (!ImGuizmo::IsUsing())
+					m_GuizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
 		}
 

@@ -34,6 +34,8 @@ namespace GameEngine {
 		Ref<Shader> m_FlatColorShader;
 		Ref<Framebuffer> m_Framebuffer;
 
+		Entity m_HoveredEntity;
+
 		EditorCamera m_EditorCamera;
 
 		Ref<Scene> m_ActiveScene;

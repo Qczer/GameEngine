@@ -78,9 +78,9 @@ namespace GameEngine {
 			auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 			for (auto entity : group)
 			{
-				auto [tc, src] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+				auto [tc, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-				Renderer2D::DrawQuad(tc.GetTransform(), src.Color);
+				Renderer2D::DrawSprite(tc.GetTransform(), sprite, (int)entity);
 			}
 
 			Renderer2D::EndScene();
@@ -94,9 +94,9 @@ namespace GameEngine {
 		auto group = m_Registry.group<TransformComponent>(entt::get<SpriteRendererComponent>);
 		for (auto entity : group)
 		{
-			auto [tc, src] = group.get<TransformComponent, SpriteRendererComponent>(entity);
+			auto [tc, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-			Renderer2D::DrawQuad(tc.GetTransform(), src.Color);
+			Renderer2D::DrawSprite(tc.GetTransform(), sprite, (int)entity);
 		}
 
 		Renderer2D::EndScene();
