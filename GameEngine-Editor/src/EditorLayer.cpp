@@ -264,6 +264,7 @@ namespace GameEngine {
 
 		EventDispatcher dispatcher(e);
 		dispatcher.Dispatch<KeyPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+		dispatcher.Dispatch<MouseButtonPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	}
 
 	bool EditorLayer::OnKeyPressed(KeyPressedEvent e)
@@ -318,6 +319,17 @@ namespace GameEngine {
 		}
 
         return false;
+	}
+
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent e)
+	{
+		if (e.GetMouseButton() == Mouse::ButtonLeft)
+		{
+			if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+		}
+
+		return false;
 	}
 
 	void EditorLayer::NewScene()
