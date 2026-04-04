@@ -10,3 +10,6 @@
 [submodule "GameEngine/vendor/ImGuizmo"]
 	path = GameEngine/vendor/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo
+[submodule "GameEngine/vendor/yaml-cpp"]
+	path = GameEngine/vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp

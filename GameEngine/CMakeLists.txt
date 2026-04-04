@@ -18,13 +18,12 @@ add_subdirectory(vendor/yaml-cpp)
 set(GE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(GE_VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 
-file(GLOB_RECURSE ENGINE_SOURCES "${GE_SRC_DIR}/*.cpp" "${GE_SRC_DIR}/*.h")
-file(GLOB STB_SOURCES "${GE_VENDOR_DIR}/stb_image/*.cpp" "${GE_VENDOR_DIR}/stb_image/*.h")
+file(GLOB_RECURSE GE_SOURCES "${GE_SRC_DIR}/*.cpp" "${GE_SRC_DIR}/*.h")
 file(GLOB IMGUIZMO_SOURCES "${GE_VENDOR_DIR}/ImGuizmo/*.cpp" "${GE_VENDOR_DIR}/ImGuizmo/*.h")
-set(GE_SOURCES ${ENGINE_SOURCES} ${STB_SOURCES} ${IMGUIZMO_SOURCES})
+file(GLOB STB_SOURCES "${GE_VENDOR_DIR}/stb_image/*.cpp" "${GE_VENDOR_DIR}/stb_image/*.h")
 
-list(FILTER GE_SOURCES EXCLUDE REGEX "${GE_SRC_DIR}/Platform/Windows/")
-list(FILTER GE_SOURCES EXCLUDE REGEX "${GE_SRC_DIR}/Platform/Linux/")
+list(FILTER GE_SOURCES EXCLUDE REGEX "Platform/Windows/")
+list(FILTER GE_SOURCES EXCLUDE REGEX "Platform/Linux/")
 
 if(WIN32)
     file(GLOB_RECURSE PLATFORM_SOURCES "${GE_SRC_DIR}/Platform/Windows/*.cpp" "${GE_SRC_DIR}/Platform/Windows/*.h")
@@ -33,33 +32,47 @@ elseif(UNIX)
 endif()
 list(APPEND GE_SOURCES ${PLATFORM_SOURCES})
 
+add_library(ImGuizmo STATIC ${IMGUIZMO_SOURCES})
+target_include_directories(ImGuizmo PUBLIC "${GE_VENDOR_DIR}/ImGuizmo" "${GE_VENDOR_DIR}/imgui")
+set_source_files_properties(${IMGUIZMO_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
+
+add_library(stb_image STATIC ${STB_SOURCES})
+target_include_directories(stb_image PUBLIC "${GE_VENDOR_DIR}/stb_image")
+
 # TARGET
 add_library(GameEngine STATIC ${GE_SOURCES})
 
-if(GE_ENABLE_WARNINGS)
+if(GE_ENABLE_ALL_WARNINGS)
     target_compile_options(GameEngine PRIVATE ${GE_WARNING_FLAGS})
 endif()
-message("Enable warnings:" ${GE_ENABLE_WARNINGS})
+message("Enable all warnings: " ${GE_ENABLE_ALL_WARNINGS})
 
 target_precompile_headers(GameEngine PRIVATE "${GE_SRC_DIR}/gepch.h")
 
-# Turn off PCH for ImGuizmo to avoid compilation errors
-set_source_files_properties(${IMGUIZMO_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
-
 # SYSTEM to disable warnings
 target_include_directories(GameEngine SYSTEM PUBLIC
-    "${GE_VENDOR_DIR}/spdlog/include"
-    "${GE_VENDOR_DIR}/GLFW/include"
-    "${GE_VENDOR_DIR}/Glad/include"
-    "${GE_VENDOR_DIR}/imgui"
-    "${GE_VENDOR_DIR}/glm"
-    "${GE_VENDOR_DIR}/stb_image"
+    "${GE_VENDOR_DIR}"
     "${GE_VENDOR_DIR}/entt/include"
-    "${GE_VENDOR_DIR}/yaml-cpp/include"
+    "${GE_VENDOR_DIR}/Glad/include"
+    "${GE_VENDOR_DIR}/GLFW/include"
+    "${GE_VENDOR_DIR}/glm"
+    "${GE_VENDOR_DIR}/imgui"
     "${GE_VENDOR_DIR}/ImGuizmo"
+    "${GE_VENDOR_DIR}/spdlog/include"
+    "${GE_VENDOR_DIR}/stb_image"
+    "${GE_VENDOR_DIR}/yaml-cpp/include"
 )
 target_include_directories(GameEngine PUBLIC
     "${GE_SRC_DIR}"
+)
+
+target_link_libraries(GameEngine PUBLIC 
+    ImGuizmo 
+    stb_image 
+    glfw 
+    Glad 
+    ImGui 
+    yaml-cpp
 )
 
 target_compile_definitions(GameEngine PUBLIC YAML_CPP_STATIC_DEFINE)
