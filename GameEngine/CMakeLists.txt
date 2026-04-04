@@ -10,10 +10,9 @@ set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
 
-add_subdirectory(vendor/GLFW)
-add_subdirectory(vendor/Glad)
-add_subdirectory(vendor/imgui)
-add_subdirectory(vendor/yaml-cpp)
+add_subdirectory(vendor/GLFW SYSTEM)
+add_subdirectory(vendor/Glad SYSTEM)
+add_subdirectory(vendor/imgui SYSTEM)
 
 set(GE_SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
 set(GE_VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
@@ -21,6 +20,7 @@ set(GE_VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 file(GLOB_RECURSE GE_SOURCES "${GE_SRC_DIR}/*.cpp" "${GE_SRC_DIR}/*.h")
 file(GLOB IMGUIZMO_SOURCES "${GE_VENDOR_DIR}/ImGuizmo/*.cpp" "${GE_VENDOR_DIR}/ImGuizmo/*.h")
 file(GLOB STB_SOURCES "${GE_VENDOR_DIR}/stb_image/*.cpp" "${GE_VENDOR_DIR}/stb_image/*.h")
+file(GLOB_RECURSE YAML_SOURCES "${GE_VENDOR_DIR}/yaml-cpp/src/*.cpp" "${GE_VENDOR_DIR}/yaml-cpp/src/*.h")
 
 list(FILTER GE_SOURCES EXCLUDE REGEX "Platform/Windows/")
 list(FILTER GE_SOURCES EXCLUDE REGEX "Platform/Linux/")
@@ -38,6 +38,11 @@ set_source_files_properties(${IMGUIZMO_SOURCES} PROPERTIES SKIP_PRECOMPILE_HEADE
 
 add_library(stb_image STATIC ${STB_SOURCES})
 target_include_directories(stb_image PUBLIC "${GE_VENDOR_DIR}/stb_image")
+
+add_library(yaml-cpp STATIC ${YAML_SOURCES})
+target_include_directories(yaml-cpp PUBLIC "${GE_VENDOR_DIR}/yaml-cpp/include")
+target_include_directories(yaml-cpp PRIVATE "${GE_VENDOR_DIR}/yaml-cpp/src")
+target_compile_definitions(yaml-cpp PUBLIC YAML_CPP_STATIC_DEFINE)
 
 # TARGET
 add_library(GameEngine STATIC ${GE_SOURCES})
@@ -74,9 +79,6 @@ target_link_libraries(GameEngine PUBLIC
     ImGui 
     yaml-cpp
 )
-
-target_compile_definitions(GameEngine PUBLIC YAML_CPP_STATIC_DEFINE)
-target_link_libraries(GameEngine PUBLIC glfw Glad ImGui yaml-cpp)
 
 if(WIN32)
     target_link_libraries(GameEngine PUBLIC opengl32.lib)
