@@ -181,7 +181,7 @@ namespace GameEngine {
 		fout.flush();
 	}
 
-	void SceneSerializer::SerializeRuntime(const std::filesystem::path& filepath)
+	void SceneSerializer::SerializeRuntime(const std::filesystem::path& /*filepath*/)
 	{
 		// Not implemented
 		GE_CORE_ASSERT(false, "");
@@ -196,24 +196,21 @@ namespace GameEngine {
 		std::string sceneName = data["Scene"].as<std::string>();
 		GE_CORE_TRACE("Deserializing scene '{}'", sceneName);
 
-		auto entities = data["Entities"];
-		if (entities)
+		if (auto entities = data["Entities"])
 		{
 			for (auto entity : entities)
 			{
 				uint64_t uuid = entity["Entity"].as<uint64_t>(); // TODO
 
 				std::string name;
-				auto tagComponent = entity["TagComponent"];
-				if (tagComponent)
+				if (auto tagComponent = entity["TagComponent"])
 					name = tagComponent["Tag"].as<std::string>();
 
 				GE_CORE_TRACE("Deserialized entity with ID = {}, name = {}", uuid, name);
 
 				Entity deserializedEntity = m_Scene->CreateEntity(name);
 
-				auto transformComponent = entity["TransformComponent"];
-				if (transformComponent)
+				if (auto transformComponent = entity["TransformComponent"])
 				{
 					// Entities always have transforms
 					auto& tc = deserializedEntity.GetComponent<TransformComponent>();
@@ -222,8 +219,7 @@ namespace GameEngine {
 					tc.Scale = transformComponent["Scale"].as<glm::vec3>();
 				}
 
-				auto cameraComponent = entity["CameraComponent"];
-				if (cameraComponent)
+				if (auto cameraComponent = entity["CameraComponent"])
 				{
 					auto& cc = deserializedEntity.AddComponent<CameraComponent>();
 
@@ -242,8 +238,7 @@ namespace GameEngine {
 					cc.FixedAspectRatio = cameraComponent["FixedAspectRatio"].as<bool>();
 				}
 
-				auto spriteRendererComponent = entity["SpriteRendererComponent"];
-				if (spriteRendererComponent)
+				if (auto spriteRendererComponent = entity["SpriteRendererComponent"])
 				{
 					auto& src = deserializedEntity.AddComponent<SpriteRendererComponent>();
 					src.Color = spriteRendererComponent["Color"].as<glm::vec4>();
@@ -254,7 +249,7 @@ namespace GameEngine {
 		return true;
 	}
 
-	bool SceneSerializer::DeserializeRuntime(const std::filesystem::path& filepath)
+	bool SceneSerializer::DeserializeRuntime(const std::filesystem::path& /*filepath*/)
 	{
 		// Not implemented
 		GE_CORE_ASSERT(false, "");

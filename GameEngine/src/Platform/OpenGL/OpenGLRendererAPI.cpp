@@ -6,13 +6,13 @@
 namespace GameEngine {
 
 	void OpenGLMessageCallback(
-		unsigned source,
-		unsigned type,
-		unsigned id,
+		unsigned /*source*/,
+		unsigned /*type*/,
+		unsigned /*id*/,
 		unsigned severity,
-		int length,
+		int /*length*/,
 		const char* message,
-		const void* userParam)
+		const void* /*userParam*/)
 	{
 		switch (severity)
 		{

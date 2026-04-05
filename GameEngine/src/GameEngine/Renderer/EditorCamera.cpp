@@ -12,8 +12,8 @@
 
 namespace GameEngine {
 
-	EditorCamera::EditorCamera(float fov, float aspectRatio, float nearClip, float farClip)
-		: m_FOV(fov), m_AspectRatio(aspectRatio), m_NearClip(nearClip), m_FarClip(farClip), Camera(glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip))
+	EditorCamera::EditorCamera(const float fov, const float aspectRatio, const float nearClip, const float farClip)
+		: Camera(glm::perspective(glm::radians(fov), aspectRatio, nearClip, farClip)), m_FOV(fov), m_AspectRatio(aspectRatio), m_NearClip(nearClip), m_FarClip(farClip)
 	{
 		UpdateView();
 	}
@@ -29,23 +29,23 @@ namespace GameEngine {
 		// m_Yaw = m_Pitch = 0.0f; // Lock the camera's rotation
 		m_Position = CalculatePosition();
 
-		glm::quat orientation = GetOrientation();
+		const glm::quat orientation = GetOrientation();
 		m_ViewMatrix = glm::translate(glm::mat4(1.0f), m_Position) * glm::toMat4(orientation);
 		m_ViewMatrix = glm::inverse(m_ViewMatrix);
 	}
 
 	std::pair<float, float> EditorCamera::PanSpeed() const
 	{
-		float x = std::min(m_ViewportWidth / 1000.0f, 2.4f); // max = 2.4f
+		const float x = std::min(m_ViewportWidth / 1000.0f, 2.4f); // max = 2.4f
 		float xFactor = 0.0366f * (x * x) - 0.1778f * x + 0.3021f;
 
-		float y = std::min(m_ViewportHeight / 1000.0f, 2.4f); // max = 2.4f
+		const float y = std::min(m_ViewportHeight / 1000.0f, 2.4f); // max = 2.4f
 		float yFactor = 0.0366f * (y * y) - 0.1778f * y + 0.3021f;
 
 		return { xFactor, yFactor };
 	}
 
-	float EditorCamera::RotationSpeed() const
+	float EditorCamera::RotationSpeed()
 	{
 		return 0.8f;
 	}
@@ -59,12 +59,12 @@ namespace GameEngine {
 		return speed;
 	}
 
-	void EditorCamera::OnUpdate(Timestep ts)
+	void EditorCamera::OnUpdate(Timestep /*ts*/)
 	{
 		if (Input::IsKeyPressed(Key::LeftAlt))
 		{
 			const glm::vec2& mouse{ Input::GetMouseX(), Input::GetMouseY() };
-			glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
+			const glm::vec2 delta = (mouse - m_InitialMousePosition) * 0.003f;
 			m_InitialMousePosition = mouse;
 
 			if (Input::IsMouseButtonPressed(Mouse::ButtonMiddle))
@@ -86,7 +86,7 @@ namespace GameEngine {
 
 	bool EditorCamera::OnMouseScroll(MouseScrolledEvent& e)
 	{
-		float delta = e.GetYOffset() * 0.1f;
+		const float delta = e.GetYOffset() * 0.1f;
 		MouseZoom(delta);
 		UpdateView();
 		return false;
@@ -101,12 +101,12 @@ namespace GameEngine {
 
 	void EditorCamera::MouseRotate(const glm::vec2& delta)
 	{
-		float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
+		const float yawSign = GetUpDirection().y < 0 ? -1.0f : 1.0f;
 		m_Yaw += yawSign * delta.x * RotationSpeed();
 		m_Pitch += delta.y * RotationSpeed();
 	}
 
-	void EditorCamera::MouseZoom(float delta)
+	void EditorCamera::MouseZoom(const float delta)
 	{
 		m_Distance -= delta * ZoomSpeed();
 		if (m_Distance < 1.0f)
@@ -138,7 +138,7 @@ namespace GameEngine {
 
 	glm::quat EditorCamera::GetOrientation() const
 	{
-		return glm::quat(glm::vec3(-m_Pitch, -m_Yaw, 0.0f));
+		return {glm::vec3(-m_Pitch, -m_Yaw, 0.0f)};
 	}
 
 }

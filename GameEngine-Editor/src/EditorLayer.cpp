@@ -42,7 +42,7 @@ namespace GameEngine {
 	{
 		GE_PROFILE_FUNCTION();
 
-		if (Input::IsKeyPressed(GE_KEY_ESCAPE))
+		if (Input::IsKeyPressed(Key::Escape))
 			Application::Get().Close();
 
 		m_ElapsedTime += ts;
@@ -53,7 +53,7 @@ namespace GameEngine {
 		}
 
 		Renderer2D::ResetStats();
-		if (m_ViewportSize.x == 0 || m_ViewportSize.y == 0)
+		if (m_ViewportSize.x == 0.0f || m_ViewportSize.y == 0.0f)
 			return;
 
 		// Resize framebuffer
@@ -61,10 +61,10 @@ namespace GameEngine {
 			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
 			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
 		{
-			m_Framebuffer->Resize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_Framebuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
 			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
 			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
 		}
 
 		// Update camera controller
@@ -89,8 +89,8 @@ namespace GameEngine {
 		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
 		my = viewportSize.y - my;
 
-		int mouseX = (int)mx;
-		int mouseY = (int)my;
+		int mouseX = static_cast<int>(mx);
+		int mouseY = static_cast<int>(my);
 
 		if (mouseX > 0 && mouseY > 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
 		{
@@ -208,8 +208,8 @@ namespace GameEngine {
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
 
-			float windowWidth = (float)ImGui::GetWindowWidth();
-			float windowHeight = (float)ImGui::GetWindowHeight();
+			//float windowWidth = (float)ImGui::GetWindowWidth();
+			//float windowHeight = (float)ImGui::GetWindowHeight();
 			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
 
 			// Camera
@@ -267,7 +267,7 @@ namespace GameEngine {
 		dispatcher.Dispatch<MouseButtonPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
 	}
 
-	bool EditorLayer::OnKeyPressed(KeyPressedEvent e)
+	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
 	{
 		// Shortcuts
 		if (e.GetRepeatCount() > 0)
@@ -281,21 +281,18 @@ namespace GameEngine {
 			{
 				if (control)
 					NewScene();
-
 				break;
 			}
 			case Key::O:
 			{
 				if (control)
 					OpenScene();
-
 				break;
 			}
 			case Key::S:
 			{
 				if (control && shift)
 					SaveSceneAs();
-
 				break;
 			}
 
@@ -316,12 +313,14 @@ namespace GameEngine {
 				if (!ImGuizmo::IsUsing())
 					m_GuizmoType = ImGuizmo::OPERATION::SCALE;
 				break;
+			default:
+				break;
 		}
 
         return false;
 	}
 
-	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent e)
+	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 	{
 		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{

@@ -44,13 +44,15 @@ target_include_directories(yaml-cpp PUBLIC "${GE_VENDOR_DIR}/yaml-cpp/include")
 target_include_directories(yaml-cpp PRIVATE "${GE_VENDOR_DIR}/yaml-cpp/src")
 target_compile_definitions(yaml-cpp PUBLIC YAML_CPP_STATIC_DEFINE)
 
+silence_target_warnings(glfw)
+silence_target_warnings(Glad)
+silence_target_warnings(ImGui)
+silence_target_warnings(ImGuizmo)
+silence_target_warnings(stb_image)
+silence_target_warnings(yaml-cpp)
+
 # TARGET
 add_library(GameEngine STATIC ${GE_SOURCES})
-
-if(GE_ENABLE_ALL_WARNINGS)
-    target_compile_options(GameEngine PRIVATE ${GE_WARNING_FLAGS})
-endif()
-message("Enable all warnings: " ${GE_ENABLE_ALL_WARNINGS})
 
 target_precompile_headers(GameEngine PRIVATE "${GE_SRC_DIR}/gepch.h")
 
@@ -71,7 +73,7 @@ target_include_directories(GameEngine PUBLIC
     "${GE_SRC_DIR}"
 )
 
-target_link_libraries(GameEngine PUBLIC 
+target_link_libraries(GameEngine PUBLIC
     ImGuizmo 
     stb_image 
     glfw 
@@ -79,6 +81,7 @@ target_link_libraries(GameEngine PUBLIC
     ImGui 
     yaml-cpp
 )
+target_link_libraries(GameEngine PRIVATE myproject_warnings)
 
 if(WIN32)
     target_link_libraries(GameEngine PUBLIC opengl32.lib)

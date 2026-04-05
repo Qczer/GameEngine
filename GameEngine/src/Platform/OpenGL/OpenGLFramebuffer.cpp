@@ -19,14 +19,14 @@ namespace GameEngine {
 			glCreateTextures(TextureTarget(multiSampled), count, outID);
 		}
 
-		static void BindTexture(bool multiSampled, uint32_t id)
+		static void BindTexture(const bool multiSampled, const uint32_t id)
 		{
 			glBindTexture(TextureTarget(multiSampled), id);
 		}
 
 		static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index)
 		{
-			bool multiSampled = samples > 1;
+			const bool multiSampled = samples > 1;
 			if (!multiSampled)
 			{
 				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, nullptr);
@@ -62,31 +62,33 @@ namespace GameEngine {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, attachmentType, TextureTarget(multiSampled), id, 0);
 		}
 
-		static bool IsDepthFormat(FramebufferTextureFormat format)
+		static bool IsDepthFormat(const FramebufferTextureFormat format)
 		{
 			switch (format)
 			{
 				case FramebufferTextureFormat::DEPTH24STENCIL8:	return true;
+				default:
+					GE_CORE_WARN("Unknown FramebufferTextureFormat!");
+					return false;
 			}
-			return false;
 		}
 
-		static GLenum GameEngineFBTextureFormatToGL(FramebufferTextureFormat format)
+		static GLenum GameEngineFBTextureFormatToGL(const FramebufferTextureFormat format)
 		{
 			switch (format)
 			{
 				case FramebufferTextureFormat::RGBA8:		return GL_RGBA8;
 				case FramebufferTextureFormat::RED_INTEGER:	return GL_RED_INTEGER;
+				default:
+					GE_CORE_ASSERT(false, "Unknown Framebuffer Format");
+					return 0;
 			}
-
-			GE_CORE_ASSERT(false, "Unknown Framebuffer Format");
-			return 0;
 		}
 
 	}
 
-	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& spec)
-		: m_Specification(spec)
+	OpenGLFramebuffer::OpenGLFramebuffer(const FramebufferSpecification& specification)
+		: m_Specification(specification)
 	{
 		for (auto spec : m_Specification.Attachments.Attachments)
 		{
@@ -124,7 +126,7 @@ namespace GameEngine {
 		bool multiSampled = m_Specification.Samples > 1;
 
 		// Attachments
-		if (m_ColorAttachmentSpecifications.size())
+		if (!m_ColorAttachmentSpecifications.empty())
 		{
 			m_ColorAttachments.resize(m_ColorAttachmentSpecifications.size());
 			Utils::CreateTextures(multiSampled, m_ColorAttachments.data(), m_ColorAttachments.size());
@@ -140,6 +142,9 @@ namespace GameEngine {
 					case FramebufferTextureFormat::RED_INTEGER:
 						Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);
 						break;
+					default:
+						GE_CORE_ASSERT(false, "Unknown Framebuffer Format");
+						break;
 				}
 			}
 		}
@@ -152,6 +157,9 @@ namespace GameEngine {
 			{
 				case FramebufferTextureFormat::DEPTH24STENCIL8:
 					Utils::AttachDepthTexture(m_DepthAttachment, m_Specification.Samples, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, m_Specification.Width, m_Specification.Height);
+					break;
+				default:
+					GE_CORE_ASSERT(false, "Unknown FramebufferTextureFormat!");
 					break;
 			}
 		}
@@ -186,7 +194,7 @@ namespace GameEngine {
 
 	void OpenGLFramebuffer::Resize(uint32_t width, uint32_t height)
 	{
-		if (width < 0 || height < 0 || width > s_MaxFrameBufferSize || height > s_MaxFrameBufferSize)
+		if (width > s_MaxFrameBufferSize || height > s_MaxFrameBufferSize)
 		{
 			GE_CORE_WARN("Attempted to resize framebuffer to {}, {}", width, height);
 			return;

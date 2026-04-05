@@ -96,7 +96,7 @@ namespace GameEngine {
 				data.EventCallback(event);
 			});
 
-		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int scancode, int action, int mods)
+		glfwSetKeyCallback(m_Window, [](GLFWwindow* window, int key, int /*scancode*/, int action, int /*mods*/)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 
@@ -131,7 +131,7 @@ namespace GameEngine {
 			data.EventCallback(event);
 		});
 
-		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int mods)
+		glfwSetMouseButtonCallback(m_Window, [](GLFWwindow* window, int button, int action, int /*mods*/)
 			{
 				WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
 

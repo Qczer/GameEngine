@@ -19,15 +19,12 @@ target_sources(ImGui PRIVATE
     backends/imgui_impl_glfw.cpp
 )
 
-target_compile_features(ImGui PUBLIC cxx_std_23)
-
-target_include_directories(ImGui PUBLIC 
+target_include_directories(ImGui SYSTEM PUBLIC
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${CMAKE_CURRENT_SOURCE_DIR}/backends"
 )
 
 target_link_libraries(ImGui PUBLIC glfw Glad)
-target_include_directories(ImGui PUBLIC .)
 
 if(MSVC)
     set_property(TARGET ImGui PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -35,10 +32,4 @@ endif()
 
 if(UNIX AND NOT APPLE)
     set_target_properties(ImGui PROPERTIES POSITION_INDEPENDENT_CODE ON)
-endif()
-
-set_target_properties(ImGui PROPERTIES ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>-${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}/ImGui")
-
-if(CMAKE_BUILD_TYPE STREQUAL "Dist" OR CMAKE_BUILD_TYPE STREQUAL "Release")
-    # Możesz dodać flagi specyficzne dla kompilatora, jeśli potrzebujesz
 endif()

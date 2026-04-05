@@ -3,11 +3,7 @@ project(GameEngine-Editor)
 file(GLOB_RECURSE EDITOR_SOURCES "src/*.cpp" "src/*.h")
 add_executable(GameEngine-Editor ${EDITOR_SOURCES})
 
-if(GE_ENABLE_ALL_WARNINGS)
-    target_compile_options(GameEngine-Editor PRIVATE ${GE_WARNING_FLAGS})
-endif()
-
-target_link_libraries(GameEngine-Editor PRIVATE GameEngine)
+target_link_libraries(GameEngine-Editor PRIVATE GameEngine myproject_warnings)
 
 if(UNIX)
     target_link_libraries(GameEngine-Editor PRIVATE PkgConfig::GTKMM)

@@ -66,7 +66,7 @@ namespace GameEngine {
         ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
         flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
-        bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+        bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", tag.c_str());
         if (ImGui::IsItemClicked())
             m_SelectionContext = entity;
 
@@ -82,9 +82,9 @@ namespace GameEngine {
 
         if (opened)
         {
-			ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
-			bool opened = ImGui::TreeNodeEx((void*)9817239, flags, tag.c_str());
-			if (opened)
+			ImGuiTreeNodeFlags childFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAvailWidth;
+			bool childOpened = ImGui::TreeNodeEx((void*)9817239, childFlags, "%s", tag.c_str());
+			if (childOpened)
 				ImGui::TreePop();
 			ImGui::TreePop();
         }
@@ -158,7 +158,7 @@ namespace GameEngine {
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4,4 });
             float lineHeight = GImGui->FontSize + GImGui->Style.FramePadding.y * 2.0f;
             ImGui::Separator();
-            bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, name.c_str());
+            bool open = ImGui::TreeNodeEx((void*)typeid(T).hash_code(), treeNodeFlags, "%s", name.c_str());
             ImGui::PopStyleVar();
             ImGui::SameLine(contentRegionAvailable.x - lineHeight * 0.5f);
             if (ImGui::Button("+", ImVec2{ lineHeight, lineHeight }))
@@ -296,7 +296,7 @@ namespace GameEngine {
 
         DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
         {
-            ImGui::ColorEdit4("Color", glm::value_ptr(component.Color), 0.5f);
+            ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
         });
 	}
 

@@ -15,7 +15,6 @@ namespace GameEngine {
 		std::string Tag;
 
 		TagComponent() = default;
-		TagComponent(const TagComponent&) = default;
 		TagComponent(const std::string& tag)
 			: Tag(tag) {}
 	};
@@ -27,13 +26,12 @@ namespace GameEngine {
 		glm::vec3 Scale = { 1.0f, 1.0f, 1.0f };
 
 		TransformComponent() = default;
-		TransformComponent(const TransformComponent&) = default;
 		TransformComponent(const glm::vec3& translation)
 			: Translation(translation) {}
 
-		glm::mat4 GetTransform() const
+		[[nodiscard]] glm::mat4 GetTransform() const
 		{
-			glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
+			const glm::mat4 rotation = glm::toMat4(glm::quat(Rotation));
 
 			return glm::translate(glm::mat4(1.0f), Translation)
 				* rotation
@@ -46,7 +44,6 @@ namespace GameEngine {
 		glm::vec4 Color{ 1.0f, 1.0f, 1.0f, 1.0f};
 
 		SpriteRendererComponent() = default;
-		SpriteRendererComponent(const SpriteRendererComponent&) = default;
 		SpriteRendererComponent(const glm::vec4& color)
 			: Color(color) {}
 		SpriteRendererComponent(float r, float g, float b, float a)
@@ -60,7 +57,6 @@ namespace GameEngine {
 		bool FixedAspectRatio = false;
 
 		CameraComponent() = default;
-		CameraComponent(const CameraComponent&) = default;
 	};
 
 	struct NativeScriptComponent

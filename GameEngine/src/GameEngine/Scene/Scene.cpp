@@ -10,17 +10,9 @@
 
 namespace GameEngine {
 
-	static void OnTransformConstruct(entt::registry& registry, entt::entity entity)
+	static void OnTransformConstruct(entt::registry& /*registry*/, entt::entity /*entity*/)
 	{
 		GE_CORE_TRACE("Constructed a transform");
-	}
-
-	Scene::Scene()
-	{
-	}
-
-	Scene::~Scene()
-	{
 	}
 
 	Entity Scene::CreateEntity(const std::string& name)
@@ -32,7 +24,7 @@ namespace GameEngine {
 		return entity;
 	}
 
-	void Scene::DestroyEntity(Entity entity)
+	void Scene::DestroyEntity(const Entity entity)
 	{
 		m_Registry.destroy(entity);
 	}
@@ -80,14 +72,14 @@ namespace GameEngine {
 			{
 				auto [tc, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-				Renderer2D::DrawSprite(tc.GetTransform(), sprite, (int)entity);
+				Renderer2D::DrawSprite(tc.GetTransform(), sprite, static_cast<int>(entity));
 			}
 
 			Renderer2D::EndScene();
 		}
 	}
 
-	void Scene::OnUpdateEditor(Timestep ts, EditorCamera& camera)
+	void Scene::OnUpdateEditor(Timestep /*ts*/, const EditorCamera& camera)
 	{
 		Renderer2D::BeginScene(camera);
 
@@ -96,7 +88,7 @@ namespace GameEngine {
 		{
 			auto [tc, sprite] = group.get<TransformComponent, SpriteRendererComponent>(entity);
 
-			Renderer2D::DrawSprite(tc.GetTransform(), sprite, (int)entity);
+			Renderer2D::DrawSprite(tc.GetTransform(), sprite, static_cast<int>(entity));
 		}
 
 		Renderer2D::EndScene();
@@ -122,40 +114,16 @@ namespace GameEngine {
 		{
 			const auto& cc = view.get<CameraComponent>(entity);
 			if (cc.Primary)
-				return Entity(entity, this);
+				return {entity, this};
 		}
-	}
 
-	template <typename T>
-	void Scene::OnComponentAdded(Entity entity, T& component)
-	{
-		static_assert(false);
+		return {};
 	}
 
 	template <>
-	void Scene::OnComponentAdded<CameraComponent>(Entity entity, CameraComponent& component)
+	inline void Scene::OnComponentAdded<CameraComponent>(Entity& /*entity*/, CameraComponent& component)
 	{
 		component.Camera.SetViewportSize(m_ViewportWidth, m_ViewportHeight);
-	}
-
-	template <>
-	void Scene::OnComponentAdded<TagComponent>(Entity entity, TagComponent& component)
-	{
-	}
-
-	template <>
-	void Scene::OnComponentAdded<TransformComponent>(Entity entity, TransformComponent& component)
-	{
-	}
-
-	template <>
-	void Scene::OnComponentAdded<SpriteRendererComponent>(Entity entity, SpriteRendererComponent& component)
-	{
-	}
-
-	template <>
-	void Scene::OnComponentAdded<NativeScriptComponent>(Entity entity, NativeScriptComponent& component)
-	{
 	}
 
 }
