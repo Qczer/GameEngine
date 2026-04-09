@@ -14,9 +14,7 @@ namespace GameEngine {
 			PushLayer(new EditorLayer());
 		}
 
-		~GameEngineEditor()
-		{
-		}
+		~GameEngineEditor() override = default;
 	};
 
 	Application* CreateApplication()

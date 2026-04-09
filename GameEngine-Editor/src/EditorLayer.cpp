@@ -92,10 +92,12 @@ namespace GameEngine {
 		int mouseX = static_cast<int>(mx);
 		int mouseY = static_cast<int>(my);
 
-		if (mouseX > 0 && mouseY > 0 && mouseX < (int)viewportSize.x && mouseY < (int)viewportSize.y)
+		if (mouseX > 0 && mouseY > 0 && mouseX < static_cast<int>(viewportSize.x) && mouseY < static_cast<int>(viewportSize.y))
 		{
-			int pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY);
-			m_HoveredEntity = pixelData == -1 ? Entity() : Entity((entt::entity)pixelData, m_ActiveScene.get());
+			if (const std::optional<int> pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY))
+				m_HoveredEntity.emplace(static_cast<entt::entity>(*pixelData), m_ActiveScene.get());
+			else
+				m_HoveredEntity.reset();
 		}
 
 		m_Framebuffer->Unbind();
@@ -169,13 +171,16 @@ namespace GameEngine {
 
 		ImGui::Begin("Stats");
 
-		std::string name = "None";
-		if (m_HoveredEntity && m_HoveredEntity.HasComponent<TagComponent>())
-			name = m_HoveredEntity.GetComponent<TagComponent>().Tag;
-		ImGui::Text("Hovered Entity: %s (%i)", name.c_str(), (entt::entity)m_HoveredEntity);
+		if (m_HoveredEntity && m_HoveredEntity->HasComponent<TagComponent>())
+		{
+			std::string name = m_HoveredEntity->GetComponent<TagComponent>().Tag;
+			ImGui::Text("Hovered Entity: %s (%i)", name.c_str(), static_cast<entt::entity>(*m_HoveredEntity));
+		}
+		else
+			ImGui::Text("Hovered Entity: None");
 
 		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Framerate: %i", (int)(m_FrameRate));
+		ImGui::Text("Framerate: %i", static_cast<int>(m_FrameRate));
 		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
 		ImGui::Text("Quads: %d", stats.QuadCount);
 		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
@@ -202,8 +207,7 @@ namespace GameEngine {
 		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
 
 		// Guizmo
-		Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-		if (selectedEntity)
+		if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
 		{
 			ImGuizmo::SetOrthographic(false);
 			ImGuizmo::SetDrawlist();
@@ -236,7 +240,7 @@ namespace GameEngine {
 			float snapValues[3] = { snapValue, snapValue, snapValue };
 
 			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				(ImGuizmo::OPERATION)m_GuizmoType, IMGUIZMO_NAMESPACE::LOCAL, glm::value_ptr(transform),
+				static_cast<ImGuizmo::OPERATION>(m_GuizmoType), IMGUIZMO_NAMESPACE::LOCAL, glm::value_ptr(transform),
 				nullptr, snap ? snapValues : nullptr);
 
 			if (ImGuizmo::IsUsing())
@@ -324,8 +328,8 @@ namespace GameEngine {
 	{
 		if (e.GetMouseButton() == Mouse::ButtonLeft)
 		{
-			if (m_ViewportHovered && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
-				m_SceneHierarchyPanel.SetSelectedEntity(m_HoveredEntity);
+			if (m_ViewportHovered && m_HoveredEntity && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
+				m_SceneHierarchyPanel.SetSelectedEntity(*m_HoveredEntity);
 		}
 
 		return false;
@@ -334,17 +338,16 @@ namespace GameEngine {
 	void EditorLayer::NewScene()
 	{
 		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+		m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
 		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 	}
 
 	void EditorLayer::OpenScene()
 	{
-		std::optional<std::string> filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
-		if (filepath)
+		if (std::optional<std::string> filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
 		{
 			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize((uint32_t)m_ViewportSize.x, (uint32_t)m_ViewportSize.y);
+			m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
 			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 
 			SceneSerializer serializer(m_ActiveScene);
@@ -354,8 +357,7 @@ namespace GameEngine {
 
 	void EditorLayer::SaveSceneAs()
 	{
-		std::optional<std::string> filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0");
-		if (filepath)
+		if (std::optional<std::string> filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
 		{
 			SceneSerializer serializer(m_ActiveScene);
 			serializer.Serialize(*filepath);

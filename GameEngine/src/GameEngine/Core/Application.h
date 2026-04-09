@@ -26,13 +26,13 @@ namespace GameEngine {
 		void PushLayer(Layer* layer);
 		void PushOverlay(Layer* overlay);
 
-		Window& GetWindow() { return *m_Window; }
+		[[nodiscard]] Window& GetWindow() { return *m_Window; }
 
 		void Close();
 
-		ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
+		[[nodiscard]] ImGuiLayer* GetImGuiLayer() { return m_ImGuiLayer; }
 
-		static Application& Get() { return *s_Instance; }
+		[[nodiscard]] static Application& Get() { return *s_Instance; }
 	private:
 		void Run();
 		bool OnWindowClose(WindowCloseEvent& e);

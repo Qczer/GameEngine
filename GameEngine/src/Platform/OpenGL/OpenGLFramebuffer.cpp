@@ -5,7 +5,7 @@
 
 namespace GameEngine {
 
-	static const uint32_t s_MaxFrameBufferSize = 8192;
+	static constexpr uint32_t s_MaxFrameBufferSize = 8192;
 
 	namespace Utils {
 
@@ -205,13 +205,15 @@ namespace GameEngine {
 		Invalidate();
 	}
 
-	int OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
+	std::optional<int> OpenGLFramebuffer::ReadPixel(uint32_t attachmentIndex, int x, int y)
 	{
 		GE_CORE_ASSERT(attachmentIndex < m_ColorAttachments.size(), "Attachment index out of bounds");
 
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
 		int pixelData;
 		glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+		if (pixelData == -1)
+			return std::nullopt;
 		return pixelData;
 	}
 

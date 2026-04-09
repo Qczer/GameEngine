@@ -12,7 +12,7 @@ namespace GameEngine {
 	{
 	public:
 		EditorLayer();
-		~EditorLayer() = default;
+		~EditorLayer() override = default;
 
 		void OnAttach() override;
 		void OnDetach() override;
@@ -38,7 +38,7 @@ namespace GameEngine {
 		Ref<Scene> m_ActiveScene;
 
 		EditorCamera m_EditorCamera;
-		Entity m_HoveredEntity;
+		std::optional<Entity> m_HoveredEntity;
 
 		bool m_ViewportFocused = false;
 		bool m_ViewportHovered = false;

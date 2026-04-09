@@ -8,20 +8,28 @@ layout(location = 3) in int a_TexIndex;
 layout(location = 4) in float a_TilingFactor;
 layout(location = 5) in int a_EntityID;
 
-uniform mat4 u_ViewProjection;
+layout(std140, binding = 0) uniform Camera
+{
+	mat4 u_ViewProjection;
+};
 
-out vec4 v_Color;
-out vec2 v_TexCoord;
-out int v_TexIndex;
-out float v_TilingFactor;
-out int v_EntityID;
+struct VertexOutput
+{
+	vec4 Color;
+	vec2 TexCoord;
+	float TilingFactor;
+};
+
+layout (location = 0) out VertexOutput Output;
+layout (location = 3) out flat int v_TexIndex;
+layout (location = 4) out flat int v_EntityID;
 
 void main()
 {
-	v_TexCoord = a_TexCoord;
-	v_Color = a_Color;
+	Output.Color = a_Color;
+	Output.TexCoord = a_TexCoord;
+	Output.TilingFactor = a_TilingFactor;
 	v_TexIndex = a_TexIndex;
-	v_TilingFactor = a_TilingFactor;
 	v_EntityID = a_EntityID;
 	gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
 }
@@ -32,16 +40,21 @@ void main()
 layout(location = 0) out vec4 color;
 layout(location = 1) out int color2;
 
-in vec4 v_Color;
-in vec2 v_TexCoord;
-in flat int v_TexIndex;
-in float v_TilingFactor;
-in flat int v_EntityID;
+struct VertexOutput
+{
+	vec4 Color;
+	vec2 TexCoord;
+	float TilingFactor;
+};
 
-uniform sampler2D u_Textures[32];
+layout (location = 0) in VertexOutput Input;
+layout (location = 3) in flat int v_TexIndex;
+layout (location = 4) in flat int v_EntityID;
+
+layout (binding = 0) uniform sampler2D u_Textures[32];
 
 void main()
 {
-	color = texture(u_Textures[v_TexIndex], v_TexCoord * v_TilingFactor) * v_Color;
+	color = texture(u_Textures[v_TexIndex], Input.TexCoord * Input.TilingFactor) * Input.Color;
 	color2 = v_EntityID;
 }

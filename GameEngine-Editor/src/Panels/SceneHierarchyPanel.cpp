@@ -32,7 +32,7 @@ namespace GameEngine {
 			DrawEntityNode(entity);
 		}
 
-        if (ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
+        if (ImGui::BeginPopupContextWindow(nullptr, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems))
         {
 
             if (ImGui::MenuItem("Create Empty Entity"))
@@ -148,7 +148,7 @@ namespace GameEngine {
     template <typename T, typename UIFunction>
     static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
     {
-        const ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
+	    constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
 
         if (entity.HasComponent<T>())
         {
@@ -242,7 +242,7 @@ namespace GameEngine {
 			ImGui::Checkbox("Primary", &component.Primary);
 
 			const char* projectionTypeStrings[] = { "Perspective", "Orthographic" };
-			const char* currentProjectionTypeString = projectionTypeStrings[(int)camera.GetProjectionType()];
+			const char* currentProjectionTypeString = projectionTypeStrings[static_cast<int>(camera.GetProjectionType())];
 
 			if (ImGui::BeginCombo("Projection", currentProjectionTypeString))
 			{
@@ -252,7 +252,7 @@ namespace GameEngine {
 					if (ImGui::Selectable(projectionTypeStrings[i], isSelected))
 					{
 						currentProjectionTypeString = projectionTypeStrings[i];
-						camera.SetProjectionType((SceneCamera::ProjectionType)i);
+						camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(i));
 					}
 
 					if (isSelected)

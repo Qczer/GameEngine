@@ -134,6 +134,8 @@ namespace GameEngine {
 			GLenum type = kv.first;
 			const std::string& source = kv.second;
 
+			GE_CORE_TRACE("Shader source: {}", type);
+
 			GLuint shader = glCreateShader(type);
 
 			const GLchar* sourceCStr = source.c_str();
