@@ -33,6 +33,11 @@ if(MSVC)
     add_compile_options(/utf-8)
 endif()
 
+# Checks if the compiler emulates the MSVC interface (applies to MSVC and clang-cl)
+if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
+    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/std:c++latest>)
+endif()
+
 if(UNIX AND NOT APPLE)
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)

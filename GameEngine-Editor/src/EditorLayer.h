@@ -2,6 +2,7 @@
 
 #include "GameEngine.h"
 #include "Panels/SceneHierarchyPanel.h"
+#include "Panels/ContentBrowserPanel.h"
 
 #include "GameEngine/Events/KeyEvent.h"
 #include "GameEngine/Renderer/EditorCamera.h"
@@ -49,6 +50,7 @@ namespace GameEngine {
 
 		// Panels
 		SceneHierarchyPanel m_SceneHierarchyPanel;
+		ContentBrowserPanel m_ContentBrowserPanel;
 
 		float m_FrameRate = 0.0f;
 		float m_ElapsedTime = 0.0f;

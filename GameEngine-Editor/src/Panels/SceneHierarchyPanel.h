@@ -16,6 +16,7 @@ namespace GameEngine {
         void OnImGuiRender();
 
         void SetSelectedEntity(Entity entity);
+        void ResetSelectedEntity();
         [[nodiscard]] Entity GetSelectedEntity() const { return m_SelectionContext; }
     private:
         void DrawEntityNode(Entity& entity);

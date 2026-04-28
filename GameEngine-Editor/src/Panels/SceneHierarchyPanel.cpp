@@ -59,6 +59,11 @@ namespace GameEngine {
         m_SelectionContext = entity;
 	}
 
+	void SceneHierarchyPanel::ResetSelectedEntity()
+	{
+        m_SelectionContext = {};
+	}
+
 	void SceneHierarchyPanel::DrawEntityNode(Entity& entity)
 	{
 		auto& tag = entity.GetComponent<TagComponent>().Tag;

@@ -168,6 +168,7 @@ namespace GameEngine {
 		}
 
 		m_SceneHierarchyPanel.OnImGuiRender();
+		m_ContentBrowserPanel.OnImGuiRender();
 
 		ImGui::Begin("Stats");
 
@@ -330,6 +331,9 @@ namespace GameEngine {
 		{
 			if (m_ViewportHovered && m_HoveredEntity && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
 				m_SceneHierarchyPanel.SetSelectedEntity(*m_HoveredEntity);
+			else
+				m_SceneHierarchyPanel.ResetSelectedEntity();
+
 		}
 
 		return false;
