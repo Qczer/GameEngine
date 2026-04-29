@@ -19,6 +19,10 @@ add_custom_command(TARGET GameEngine-Editor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     "${CMAKE_CURRENT_SOURCE_DIR}/assets"
     "$<TARGET_FILE_DIR:GameEngine-Editor>/assets"
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+    "$<TARGET_FILE_DIR:GameEngine-Editor>/resources"
 )
 
 apply_sanitizers(GameEngine-Editor)
