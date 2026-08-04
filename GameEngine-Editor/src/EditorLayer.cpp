@@ -1,371 +1,381 @@
-#include "EditorLayer.h"
-#include "GameEngine/Scene/SceneSerializer.h"
-#include "GameEngine/Utils/PlatformUtils.h"
+#include "EditorLayer.hpp"
+#include "GameEngine/Scene/SceneSerializer.hpp"
+#include "GameEngine/Utils/PlatformUtils.hpp"
 
 #include <imgui/imgui.h>
-#include "ImGuizmo.h"
+#include <ImGuizmo.h>
 
-#include "GameEngine/Math/Math.h"
+#include "GameEngine/Math/Math.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-namespace GameEngine {
+namespace GameEngine
+{
 
-	EditorLayer::EditorLayer()
-		: Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f) {}
+EditorLayer::EditorLayer() : Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f) {}
 
-	void EditorLayer::OnAttach()
-	{
-		GE_PROFILE_FUNCTION();
+void EditorLayer::OnAttach()
+{
+  GE_PROFILE_FUNCTION();
 
-		m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
+  m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 
-		FramebufferSpecification framebufferSpec;
-		framebufferSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
-		framebufferSpec.Width = 1280;
-		framebufferSpec.Height = 720;
-		m_Framebuffer = Framebuffer::Create(framebufferSpec);
+  FramebufferSpecification framebufferSpec;
+  framebufferSpec.Attachments
+      = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
+  framebufferSpec.Width = 1280;
+  framebufferSpec.Height = 720;
+  m_Framebuffer = Framebuffer::Create(framebufferSpec);
 
-		m_ActiveScene = CreateRef<Scene>();
-		m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
+  m_ActiveScene = CreateRef<Scene>();
+  m_EditorCamera = EditorCamera(30.0f, 16.0f / 9.0f, 0.1f, 1000.0f);
 
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-	}
-
-	void EditorLayer::OnDetach()
-	{
-		GE_PROFILE_FUNCTION();
-	}
-
-	void EditorLayer::OnUpdate(Timestep ts)
-	{
-		GE_PROFILE_FUNCTION();
-
-		if (Input::IsKeyPressed(Key::Escape))
-			Application::Get().Close();
-
-		m_ElapsedTime += ts;
-		if (m_ElapsedTime >= 0.33f)
-		{
-			m_FrameRate = 1.0f / ts;
-			m_ElapsedTime = 0.0f;
-		}
-
-		Renderer2D::ResetStats();
-		if (m_ViewportSize.x == 0.0f || m_ViewportSize.y == 0.0f)
-			return;
-
-		// Resize framebuffer
-		if (auto spec = m_Framebuffer->GetSpecification();
-			m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && // zero sized framebuffer is invalid
-			(spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
-		{
-			m_Framebuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-			m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
-			m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
-			m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-		}
-
-		// Update camera controller
-		if (m_ViewportFocused)
-			m_CameraController.OnUpdate(ts);
-
-		m_EditorCamera.OnUpdate(ts);
-
-		m_Framebuffer->Bind();
-		RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1 });
-		RenderCommand::Clear();
-
-		// Clear entity ID attachment to -1
-		m_Framebuffer->ClearAttachment(1, -1);
-
-		// Update scene
-		m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
-
-		auto [mx, my] = ImGui::GetMousePos();
-		mx -= m_ViewportBounds[0].x;
-		my -= m_ViewportBounds[0].y;
-		glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
-		my = viewportSize.y - my;
-
-		int mouseX = static_cast<int>(mx);
-		int mouseY = static_cast<int>(my);
-
-		if (mouseX > 0 && mouseY > 0 && mouseX < static_cast<int>(viewportSize.x) && mouseY < static_cast<int>(viewportSize.y))
-		{
-			if (const std::optional<int> pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY))
-				m_HoveredEntity.emplace(static_cast<entt::entity>(*pixelData), m_ActiveScene.get());
-			else
-				m_HoveredEntity.reset();
-		}
-
-		m_Framebuffer->Unbind();
-	}
-
-	void EditorLayer::OnImGuiRender()
-	{
-		GE_PROFILE_FUNCTION();
-
-		static bool dockspaceOpen = true;
-		static bool opt_fullscreen_persistant = true;
-		bool opt_fullscreen = opt_fullscreen_persistant;
-		static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
-
-		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-		if (opt_fullscreen)
-		{
-			ImGuiViewport* viewport = ImGui::GetMainViewport();
-			ImGui::SetNextWindowPos(viewport->Pos);
-			ImGui::SetNextWindowSize(viewport->Size);
-			ImGui::SetNextWindowViewport(viewport->ID);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-		}
-
-		if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
-			window_flags |= ImGuiWindowFlags_NoBackground;
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-		ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
-		ImGui::PopStyleVar();
-
-		if (opt_fullscreen)
-			ImGui::PopStyleVar(2);
-
-		//Dockspace
-		ImGuiIO& io = ImGui::GetIO();
-		ImGuiStyle& style = ImGui::GetStyle();
-		float minWinSizeX = style.WindowMinSize.x;
-		style.WindowMinSize.x = 370.0f;
-		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
-		{
-			ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-		}
-
-		style.WindowMinSize.x = minWinSizeX;
-
-		if (ImGui::BeginMenuBar())
-		{
-			if (ImGui::BeginMenu("File"))
-			{
-				if (ImGui::MenuItem("New", "Ctrl+N"))
-					NewScene();
-
-				if (ImGui::MenuItem("Open...", "Ctrl+O"))
-					OpenScene();
-
-				if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
-					SaveSceneAs();
-
-				if (ImGui::MenuItem("Exit")) Application::Get().Close();
-				ImGui::EndMenu();
-			}
-			ImGui::EndMenuBar();
-		}
-
-		m_SceneHierarchyPanel.OnImGuiRender();
-		m_ContentBrowserPanel.OnImGuiRender();
-
-		ImGui::Begin("Stats");
-
-		if (m_HoveredEntity && m_HoveredEntity->HasComponent<TagComponent>())
-		{
-			std::string name = m_HoveredEntity->GetComponent<TagComponent>().Tag;
-			ImGui::Text("Hovered Entity: %s (%i)", name.c_str(), static_cast<entt::entity>(*m_HoveredEntity));
-		}
-		else
-			ImGui::Text("Hovered Entity: None");
-
-		auto stats = Renderer2D::GetStats();
-		ImGui::Text("Framerate: %i", static_cast<int>(m_FrameRate));
-		ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-		ImGui::Text("Quads: %d", stats.QuadCount);
-		ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-		ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
-
-		ImGui::End();
-
-		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
-		ImGui::Begin("Viewport");
-		auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-		auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();	
-		auto viewportOffset = ImGui::GetWindowPos();
-		m_ViewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
-		m_ViewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
-
-		m_ViewportFocused = ImGui::IsWindowFocused();
-		m_ViewportHovered = ImGui::IsWindowHovered();
-		Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
-
-		ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-		m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
-
-		uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-		ImGui::Image((void*)textureID, ImVec2{ m_ViewportSize.x, m_ViewportSize.y }, ImVec2{ 0,1 }, ImVec2{ 1,0 });
-
-		// Guizmo
-		if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
-		{
-			ImGuizmo::SetOrthographic(false);
-			ImGuizmo::SetDrawlist();
-
-			//float windowWidth = (float)ImGui::GetWindowWidth();
-			//float windowHeight = (float)ImGui::GetWindowHeight();
-			ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-			// Camera
-			// auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-			// const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-			// const glm::mat4& cameraProjection = camera.GetProjection();
-			// glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
-
-			// Editor camera
-			const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-			glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
-
-			// Entity transform
-			auto& tc = selectedEntity.GetComponent<TransformComponent>();
-			glm::mat4 transform = tc.GetTransform();
-
-			// Snapping
-			bool snap = Input::IsKeyPressed(Key::LeftControl);
-			float snapValue = 0.5f; // Snap to 0.5m for translation/scale
-			// Snap to 45 degrees for rotation
-			if (m_GuizmoType == ImGuizmo::OPERATION::ROTATE)
-				snapValue = 45.0f;
-
-			float snapValues[3] = { snapValue, snapValue, snapValue };
-
-			ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-				static_cast<ImGuizmo::OPERATION>(m_GuizmoType), IMGUIZMO_NAMESPACE::LOCAL, glm::value_ptr(transform),
-				nullptr, snap ? snapValues : nullptr);
-
-			if (ImGuizmo::IsUsing())
-			{
-				glm::vec3 translation, rotation, scale;
-				Math::DecomposeTransform(transform, translation, rotation, scale);
-
-				glm::vec3 deltaRotation = rotation - tc.Rotation;
-				tc.Translation = translation;
-				tc.Rotation += deltaRotation;
-				tc.Scale = scale;
-			}
-		}
-
-		ImGui::End();
-		ImGui::PopStyleVar();
-
-		ImGui::End();
-	}
-
-	void EditorLayer::OnEvent(Event& e)
-	{
-		m_CameraController.OnEvent(e);
-		m_EditorCamera.OnEvent(e);
-
-		EventDispatcher dispatcher(e);
-		dispatcher.Dispatch<KeyPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
-		dispatcher.Dispatch<MouseButtonPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
-	}
-
-	bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
-	{
-		// Shortcuts
-		if (e.GetRepeatCount() > 0)
-			return false;
-
-		bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
-		bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
-		switch (e.GetKeyCode())
-		{
-			case Key::N:
-			{
-				if (control)
-					NewScene();
-				break;
-			}
-			case Key::O:
-			{
-				if (control)
-					OpenScene();
-				break;
-			}
-			case Key::S:
-			{
-				if (control && shift)
-					SaveSceneAs();
-				break;
-			}
-
-			// Gizmos
-			case Key::Q:
-				if (!ImGuizmo::IsUsing())
-					m_GuizmoType = -1;
-				break;
-			case Key::W:
-				if (!ImGuizmo::IsUsing())
-					m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
-				break;
-			case Key::E:
-				if (!ImGuizmo::IsUsing())
-					m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
-				break;
-			case Key::R:
-				if (!ImGuizmo::IsUsing())
-					m_GuizmoType = ImGuizmo::OPERATION::SCALE;
-				break;
-			default:
-				break;
-		}
-
-        return false;
-	}
-
-	bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
-	{
-		if (e.GetMouseButton() == Mouse::ButtonLeft)
-		{
-			if (m_ViewportHovered && m_HoveredEntity && !ImGuizmo::IsOver() && !Input::IsKeyPressed(Key::LeftAlt))
-				m_SceneHierarchyPanel.SetSelectedEntity(*m_HoveredEntity);
-			else
-				m_SceneHierarchyPanel.ResetSelectedEntity();
-
-		}
-
-		return false;
-	}
-
-	void EditorLayer::NewScene()
-	{
-		m_ActiveScene = CreateRef<Scene>();
-		m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-		m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-	}
-
-	void EditorLayer::OpenScene()
-	{
-		if (std::optional<std::string> filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
-		{
-			m_ActiveScene = CreateRef<Scene>();
-			m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-			m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Deserialize(*filepath);
-		}
-	}
-
-	void EditorLayer::SaveSceneAs()
-	{
-		if (std::optional<std::string> filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
-		{
-			SceneSerializer serializer(m_ActiveScene);
-			serializer.Serialize(*filepath);
-		}
-	}
-
+  m_SceneHierarchyPanel.SetContext(m_ActiveScene);
 }
+
+void EditorLayer::OnDetach() { GE_PROFILE_FUNCTION(); }
+
+void EditorLayer::OnUpdate(Timestep ts)
+{
+  GE_PROFILE_FUNCTION();
+
+  if (Input::IsKeyPressed(Key::Escape))
+    Application::Get().Close();
+
+  m_ElapsedTime += ts;
+  if (m_ElapsedTime >= 0.33f)
+  {
+    m_FrameRate = 1.0f / ts;
+    m_ElapsedTime = 0.0f;
+  }
+
+  Renderer2D::ResetStats();
+  if (m_ViewportSize.x == 0.0f || m_ViewportSize.y == 0.0f)
+    return;
+
+  // Resize framebuffer
+  if (auto spec = m_Framebuffer->GetSpecification();
+      m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f
+      && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+  {
+    m_Framebuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+    m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
+    m_EditorCamera.SetViewportSize(m_ViewportSize.x, m_ViewportSize.y);
+    m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+  }
+
+  // Update camera controller
+  if (m_ViewportFocused)
+    m_CameraController.OnUpdate(ts);
+
+  m_EditorCamera.OnUpdate(ts);
+
+  m_Framebuffer->Bind();
+  RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1});
+  RenderCommand::Clear();
+
+  // Clear entity ID attachment to -1
+  m_Framebuffer->ClearAttachment(1, -1);
+
+  // Update scene
+  m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+
+  auto [mx, my] = ImGui::GetMousePos();
+  mx -= m_ViewportBounds[0].x;
+  my -= m_ViewportBounds[0].y;
+  glm::vec2 viewportSize = m_ViewportBounds[1] - m_ViewportBounds[0];
+  my = viewportSize.y - my;
+
+  int mouseX = static_cast<int>(mx);
+  int mouseY = static_cast<int>(my);
+
+  if (mouseX > 0 && mouseY > 0 && mouseX < static_cast<int>(viewportSize.x)
+      && mouseY < static_cast<int>(viewportSize.y))
+  {
+    if (const std::optional<int> pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY))
+      m_HoveredEntity.emplace(static_cast<entt::entity>(*pixelData), m_ActiveScene.get());
+    else
+      m_HoveredEntity.reset();
+  }
+
+  m_Framebuffer->Unbind();
+}
+
+void EditorLayer::OnImGuiRender()
+{
+  GE_PROFILE_FUNCTION();
+
+  static bool dockspaceOpen = true;
+  static bool opt_fullscreen_persistant = true;
+  bool opt_fullscreen = opt_fullscreen_persistant;
+  static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+
+  ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
+  if (opt_fullscreen)
+  {
+    ImGuiViewport* viewport = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(viewport->Pos);
+    ImGui::SetNextWindowSize(viewport->Size);
+    ImGui::SetNextWindowViewport(viewport->ID);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
+                    | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+  }
+
+  if (dockspace_flags & ImGuiDockNodeFlags_PassthruCentralNode)
+    window_flags |= ImGuiWindowFlags_NoBackground;
+
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+  ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
+  ImGui::PopStyleVar();
+
+  if (opt_fullscreen)
+    ImGui::PopStyleVar(2);
+
+  // Dockspace
+  ImGuiIO& io = ImGui::GetIO();
+  ImGuiStyle& style = ImGui::GetStyle();
+  float minWinSizeX = style.WindowMinSize.x;
+  style.WindowMinSize.x = 370.0f;
+  if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+  {
+    ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+    ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+  }
+
+  style.WindowMinSize.x = minWinSizeX;
+
+  if (ImGui::BeginMenuBar())
+  {
+    if (ImGui::BeginMenu("File"))
+    {
+      if (ImGui::MenuItem("New", "Ctrl+N"))
+        NewScene();
+
+      if (ImGui::MenuItem("Open...", "Ctrl+O"))
+        OpenScene();
+
+      if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S"))
+        SaveSceneAs();
+
+      if (ImGui::MenuItem("Exit"))
+        Application::Get().Close();
+      ImGui::EndMenu();
+    }
+    ImGui::EndMenuBar();
+  }
+
+  m_SceneHierarchyPanel.OnImGuiRender();
+  m_ContentBrowserPanel.OnImGuiRender();
+
+  ImGui::Begin("Stats");
+
+  if (m_HoveredEntity && m_HoveredEntity->HasComponent<TagComponent>())
+  {
+    std::string name = m_HoveredEntity->GetComponent<TagComponent>().Tag;
+    ImGui::Text("Hovered Entity: %s (%i)", name.c_str(), static_cast<entt::entity>(*m_HoveredEntity));
+  }
+  else
+    ImGui::Text("Hovered Entity: None");
+
+  auto stats = Renderer2D::GetStats();
+  ImGui::Text("Framerate: %i", static_cast<int>(m_FrameRate));
+  ImGui::Text("Draw Calls: %d", stats.DrawCalls);
+  ImGui::Text("Quads: %d", stats.QuadCount);
+  ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
+  ImGui::Text("Indices: %d", stats.GetTotalIndexCount());
+
+  ImGui::End();
+
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
+  ImGui::Begin("Viewport");
+  auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
+  auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+  auto viewportOffset = ImGui::GetWindowPos();
+  m_ViewportBounds[0] = {viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y};
+  m_ViewportBounds[1] = {viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y};
+
+  m_ViewportFocused = ImGui::IsWindowFocused();
+  m_ViewportHovered = ImGui::IsWindowHovered();
+  Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused || !m_ViewportHovered);
+
+  ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+  m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
+
+  uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
+  ImGui::Image((void*)textureID, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2{0, 1}, ImVec2{1, 0});
+
+  // Guizmo
+  if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
+  {
+    ImGuizmo::SetOrthographic(false);
+    ImGuizmo::SetDrawlist();
+
+    // float windowWidth = (float)ImGui::GetWindowWidth();
+    // float windowHeight = (float)ImGui::GetWindowHeight();
+    ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x,
+                      m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+
+    // Camera
+    // auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
+    // const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
+    // const glm::mat4& cameraProjection = camera.GetProjection();
+    // glm::mat4 cameraView =
+    // glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
+
+    // Editor camera
+    const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
+    glm::mat4 cameraView = m_EditorCamera.GetViewMatrix();
+
+    // Entity transform
+    auto& tc = selectedEntity.GetComponent<TransformComponent>();
+    glm::mat4 transform = tc.GetTransform();
+
+    // Snapping
+    bool snap = Input::IsKeyPressed(Key::LeftControl);
+    float snapValue = 0.5f; // Snap to 0.5m for translation/scale
+    // Snap to 45 degrees for rotation
+    if (m_GuizmoType == ImGuizmo::OPERATION::ROTATE)
+      snapValue = 45.0f;
+
+    float snapValues[3] = {snapValue, snapValue, snapValue};
+
+    ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
+                         static_cast<ImGuizmo::OPERATION>(m_GuizmoType), IMGUIZMO_NAMESPACE::LOCAL,
+                         glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+
+    m_GuizmoHovered = ImGuizmo::IsOver();
+
+    if (ImGuizmo::IsUsing())
+    {
+      glm::vec3 translation, rotation, scale;
+      Math::DecomposeTransform(transform, translation, rotation, scale);
+
+      glm::vec3 deltaRotation = rotation - tc.Rotation;
+      tc.Translation = translation;
+      tc.Rotation += deltaRotation;
+      tc.Scale = scale;
+    }
+  }
+  else
+  {
+    m_GuizmoHovered = false;
+  }
+
+  ImGui::End();
+  ImGui::PopStyleVar();
+
+  ImGui::End();
+}
+
+void EditorLayer::OnEvent(Event& e)
+{
+  m_CameraController.OnEvent(e);
+  m_EditorCamera.OnEvent(e);
+
+  EventDispatcher dispatcher(e);
+  dispatcher.Dispatch<KeyPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnKeyPressed));
+  dispatcher.Dispatch<MouseButtonPressedEvent>(GE_BIND_EVENT_FN(EditorLayer::OnMouseButtonPressed));
+}
+
+bool EditorLayer::OnKeyPressed(KeyPressedEvent& e)
+{
+  // Shortcuts
+  if (e.GetRepeatCount() > 0)
+    return false;
+
+  bool control = Input::IsKeyPressed(Key::LeftControl) || Input::IsKeyPressed(Key::RightControl);
+  bool shift = Input::IsKeyPressed(Key::LeftShift) || Input::IsKeyPressed(Key::RightShift);
+  switch (e.GetKeyCode())
+  {
+    case Key::N:
+      if (control)
+        NewScene();
+      break;
+    case Key::O:
+      if (control)
+        OpenScene();
+      break;
+    case Key::S:
+      if (control && shift)
+        SaveSceneAs();
+      break;
+
+    // Gizmos
+    case Key::Q:
+      if (!ImGuizmo::IsUsing())
+        m_GuizmoType = -1;
+      break;
+    case Key::W:
+      if (!ImGuizmo::IsUsing())
+        m_GuizmoType = ImGuizmo::OPERATION::TRANSLATE;
+      break;
+    case Key::E:
+      if (!ImGuizmo::IsUsing())
+        m_GuizmoType = ImGuizmo::OPERATION::ROTATE;
+      break;
+    case Key::R:
+      if (!ImGuizmo::IsUsing())
+        m_GuizmoType = ImGuizmo::OPERATION::SCALE;
+      break;
+    default:
+      break;
+  }
+
+  return false;
+}
+
+bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
+{
+  if (e.GetMouseButton() == Mouse::ButtonLeft && m_ViewportHovered && !Input::IsKeyPressed(Key::LeftAlt))
+  {
+
+    if (m_HoveredEntity && m_HoveredEntity->HasComponent<TagComponent>())
+    {
+      std::string name = m_HoveredEntity->GetComponent<TagComponent>().Tag;
+      GE_CORE_TRACE("m_HoveredEntity: {}", name);
+    }
+    GE_CORE_TRACE("m_GuizmoHovered: {}", m_GuizmoHovered);
+
+    if (m_HoveredEntity && !m_GuizmoHovered)
+      m_SceneHierarchyPanel.SetSelectedEntity(*m_HoveredEntity);
+    else if (!m_GuizmoHovered)
+      m_SceneHierarchyPanel.ResetSelectedEntity();
+  }
+
+  return false;
+}
+
+void EditorLayer::NewScene()
+{
+  m_ActiveScene = CreateRef<Scene>();
+  m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+  m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+}
+
+void EditorLayer::OpenScene()
+{
+  if (std::optional<std::string> filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
+  {
+    m_ActiveScene = CreateRef<Scene>();
+    m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+    m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+    SceneSerializer serializer(m_ActiveScene);
+    serializer.Deserialize(*filepath);
+  }
+}
+
+void EditorLayer::SaveSceneAs()
+{
+  if (std::optional<std::string> filepath = FileDialogs::SaveFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
+  {
+    SceneSerializer serializer(m_ActiveScene);
+    serializer.Serialize(*filepath);
+  }
+}
+
+} // namespace GameEngine

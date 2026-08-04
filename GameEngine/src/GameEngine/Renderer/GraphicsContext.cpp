@@ -1,20 +1,24 @@
-#include "gepch.h"
-#include "GameEngine/Renderer/GraphicsContext.h"
+#include "gepch.hpp"
+#include "GameEngine/Renderer/GraphicsContext.hpp"
 
-#include "GameEngine/Renderer/Renderer.h"
-#include "Platform/OpenGL/OpenGLContext.h"
+#include "GameEngine/Renderer/Renderer.hpp"
+#include "Platform/OpenGL/OpenGLContext.hpp"
 
-namespace GameEngine {
+namespace GameEngine
+{
 
-	Scope<GraphicsContext> GraphicsContext::Create(void* window)
-	{
-		switch (Renderer::GetAPI())
-		{
-			case RendererAPI::API::None:	GE_CORE_ASSERT(false, "RendererAPI::None is currently not supported!"); return nullptr;
-			case RendererAPI::API::OpenGL:	return CreateScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
-		}
+Scope<GraphicsContext> GraphicsContext::Create(void* window)
+{
+  switch (Renderer::GetAPI())
+  {
+    case RendererAPI::API::None:
+      GE_CORE_ASSERT(false, "RendererAPI::None is currently not supported!");
+      return nullptr;
+    case RendererAPI::API::OpenGL:
+      return CreateScope<OpenGLContext>(static_cast<GLFWwindow*>(window));
+  }
 
-		GE_CORE_ASSERT(false, "Unknown RendererAPI!");
-		return nullptr;
-	}
+  GE_CORE_ASSERT(false, "Unknown RendererAPI!");
+  return nullptr;
 }
+} // namespace GameEngine

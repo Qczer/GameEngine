@@ -1,9 +1,9 @@
-#include "gepch.h"
-#include "Entity.h"
+#include "gepch.hpp"
+#include "Entity.hpp"
 
-namespace GameEngine {
+namespace GameEngine
+{
 
-	Entity::Entity(entt::entity handle, Scene* scene)
-		: m_EntityHandle(handle), m_Scene(scene) {}
+Entity::Entity(entt::entity handle, Scene* scene) : m_EntityHandle(handle), m_Scene(scene) {}
 
-}
+} // namespace GameEngine

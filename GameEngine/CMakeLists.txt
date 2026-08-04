@@ -26,9 +26,9 @@ list(FILTER GE_SOURCES EXCLUDE REGEX "Platform/Windows/")
 list(FILTER GE_SOURCES EXCLUDE REGEX "Platform/Linux/")
 
 if(WIN32)
-    file(GLOB_RECURSE PLATFORM_SOURCES "${GE_SRC_DIR}/Platform/Windows/*.cpp" "${GE_SRC_DIR}/Platform/Windows/*.h")
+  file(GLOB_RECURSE PLATFORM_SOURCES "${GE_SRC_DIR}/Platform/Windows/*.cpp" "${GE_SRC_DIR}/Platform/Windows/*.h")
 elseif(UNIX)
-    file(GLOB_RECURSE PLATFORM_SOURCES "${GE_SRC_DIR}/Platform/Linux/*.cpp" "${GE_SRC_DIR}/Platform/Linux/*.h")
+  file(GLOB_RECURSE PLATFORM_SOURCES "${GE_SRC_DIR}/Platform/Linux/*.cpp" "${GE_SRC_DIR}/Platform/Linux/*.h")
 endif()
 list(APPEND GE_SOURCES ${PLATFORM_SOURCES})
 
@@ -54,7 +54,7 @@ silence_target_warnings(yaml-cpp)
 # TARGET
 add_library(GameEngine STATIC ${GE_SOURCES})
 
-target_precompile_headers(GameEngine PRIVATE "${GE_SRC_DIR}/gepch.h")
+target_precompile_headers(GameEngine PRIVATE "${GE_SRC_DIR}/gepch.hpp")
 
 # SYSTEM to disable warnings
 target_include_directories(GameEngine SYSTEM PUBLIC
@@ -74,20 +74,20 @@ target_include_directories(GameEngine PUBLIC
 )
 
 target_link_libraries(GameEngine PUBLIC
-    ImGuizmo 
-    stb_image 
-    glfw 
-    Glad 
-    ImGui 
+    ImGuizmo
+    stb_image
+    glfw
+    Glad
+    ImGui
     yaml-cpp
 )
 target_link_libraries(GameEngine PRIVATE myproject_warnings)
 
 if(WIN32)
-    target_link_libraries(GameEngine PUBLIC opengl32.lib)
-    target_compile_definitions(GameEngine PUBLIC GLFW_INCLUDE_NONE)
+  target_link_libraries(GameEngine PUBLIC opengl32.lib)
+  target_compile_definitions(GameEngine PUBLIC GLFW_INCLUDE_NONE)
 elseif(UNIX)
-    target_link_libraries(GameEngine PUBLIC GL pthread dl X11 Xrandr Xi Xxf86vm Xinerama Xcursor PkgConfig::GTKMM)
+  target_link_libraries(GameEngine PUBLIC GL pthread dl X11 Xrandr Xi Xxf86vm Xinerama Xcursor PkgConfig::GTKMM)
 endif()
 
 target_compile_definitions(GameEngine PRIVATE

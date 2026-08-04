@@ -1,24 +1,18 @@
-#include "GameEngine.h"
-#include "GameEngine/Core/EntryPoint.h"
+#include "GameEngine/Core/EntryPoint.hpp"
+#include "GameEngine.hpp"
 
-#include "EditorLayer.h"
+#include "EditorLayer.hpp"
 
-namespace GameEngine {
+namespace GameEngine
+{
 
-	class GameEngineEditor : public Application
-	{
-	public:
-		GameEngineEditor()
-			: Application("GameEngine Editor")
-		{
-			PushLayer(new EditorLayer());
-		}
+class GameEngineEditor : public Application
+{
+public:
+  GameEngineEditor() : Application("GameEngine Editor") { PushLayer(new EditorLayer()); }
 
-		~GameEngineEditor() override = default;
-	};
+  ~GameEngineEditor() override = default;
+};
 
-	Application* CreateApplication()
-	{
-		return new GameEngineEditor();
-	}
-}
+Application* CreateApplication() { return new GameEngineEditor(); }
+} // namespace GameEngine

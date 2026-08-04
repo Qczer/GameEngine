@@ -1,54 +1,45 @@
-#include "ExampleLayer.h"
+#include "ExampleLayer.hpp"
 
-ExampleLayer::ExampleLayer()
-	: Layer("Example"), m_CameraController(1280.0f / 720.0f, true)
+ExampleLayer::ExampleLayer() : Layer("Example"), m_CameraController(1280.0f / 720.0f, true)
 {
-	m_VertexArray = GameEngine::VertexArray::Create();
+  m_VertexArray = GameEngine::VertexArray::Create();
 
-	float vertices[3 * 7] = {
-		-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f,
-			0.5f, -0.5f, 0.0f, 0.2f, 0.3f, 0.8f, 1.0f,
-			0.0f,  0.5f, 0.0f, 0.8f, 0.8f, 0.2f, 1.0f
-	};
+  float vertices[3 * 7] = {-0.5f, -0.5f, 0.0f, 0.8f, 0.2f, 0.8f, 1.0f, 0.5f, -0.5f, 0.0f, 0.2f,
+                           0.3f,  0.8f,  1.0f, 0.0f, 0.5f, 0.0f, 0.8f, 0.8f, 0.2f,  1.0f};
 
-	GameEngine::Ref<GameEngine::VertexBuffer> vertexBuffer = GameEngine::VertexBuffer::Create(vertices, sizeof(vertices));
+  GameEngine::Ref<GameEngine::VertexBuffer> vertexBuffer = GameEngine::VertexBuffer::Create(vertices, sizeof(vertices));
 
-	GameEngine::BufferLayout layout = {
-		{ GameEngine::ShaderDataType::Float3, "a_Position" },
-		{ GameEngine::ShaderDataType::Float4, "a_Color" }
-	};
+  GameEngine::BufferLayout layout
+      = {{GameEngine::ShaderDataType::Float3, "a_Position"}, {GameEngine::ShaderDataType::Float4, "a_Color"}};
 
-	vertexBuffer->SetLayout(layout);
-	m_VertexArray->AddVertexBuffer(vertexBuffer);
+  vertexBuffer->SetLayout(layout);
+  m_VertexArray->AddVertexBuffer(vertexBuffer);
 
-	// Index Buffer
-	uint32_t indices[] = { 0, 1, 2 };
-	GameEngine::Ref<GameEngine::IndexBuffer> indexBuffer = GameEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-	m_VertexArray->SetIndexBuffer(indexBuffer);
+  // Index Buffer
+  uint32_t indices[] = {0, 1, 2};
+  GameEngine::Ref<GameEngine::IndexBuffer> indexBuffer
+      = GameEngine::IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
+  m_VertexArray->SetIndexBuffer(indexBuffer);
 
-	m_SquareVA = GameEngine::VertexArray::Create();
+  m_SquareVA = GameEngine::VertexArray::Create();
 
-	float squareVertices[5 * 4] = {
-		-0.5f, -0.5f, 0.0f, 0.0f, 0.0f,
-			0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
-			0.5f,  0.5f, 0.0f, 1.0f, 1.0f,
-		-0.5f,  0.5f, 0.0f, 0.0f, 1.0f
-	};
+  float squareVertices[5 * 4] = {-0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.0f,
+                                 0.5f,  0.5f,  0.0f, 1.0f, 1.0f, -0.5f, 0.5f,  0.0f, 0.0f, 1.0f};
 
-	GameEngine::Ref<GameEngine::VertexBuffer> squareVB = GameEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
+  GameEngine::Ref<GameEngine::VertexBuffer> squareVB
+      = GameEngine::VertexBuffer::Create(squareVertices, sizeof(squareVertices));
 
-	squareVB->SetLayout({
-		{ GameEngine::ShaderDataType::Float3, "a_Position" },
-		{ GameEngine::ShaderDataType::Float2, "a_TexCoord" }
-		});
-	m_SquareVA->AddVertexBuffer(squareVB);
+  squareVB->SetLayout(
+      {{GameEngine::ShaderDataType::Float3, "a_Position"}, {GameEngine::ShaderDataType::Float2, "a_TexCoord"}});
+  m_SquareVA->AddVertexBuffer(squareVB);
 
-	// Index Buffer
-	uint32_t squareIndices[6] = { 0, 1, 2, 2, 3, 0 };
-	GameEngine::Ref<GameEngine::IndexBuffer> squareIB = GameEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
-	m_SquareVA->SetIndexBuffer(squareIB);
+  // Index Buffer
+  uint32_t squareIndices[6] = {0, 1, 2, 2, 3, 0};
+  GameEngine::Ref<GameEngine::IndexBuffer> squareIB
+      = GameEngine::IndexBuffer::Create(squareIndices, sizeof(squareIndices) / sizeof(uint32_t));
+  m_SquareVA->SetIndexBuffer(squareIB);
 
-	std::string vertexSrc = R"(
+  std::string vertexSrc = R"(
 		#version 460 core
 			
 		layout(location = 0) in vec3 a_Position;
@@ -68,7 +59,7 @@ ExampleLayer::ExampleLayer()
 		}
 	)";
 
-	std::string fragmentSrc = R"(
+  std::string fragmentSrc = R"(
 		#version 460 core
 			
 		layout(location = 0) out vec4 color;
@@ -83,9 +74,9 @@ ExampleLayer::ExampleLayer()
 		}
 	)";
 
-	m_Shader = GameEngine::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
+  m_Shader = GameEngine::Shader::Create("VertexPosColor", vertexSrc, fragmentSrc);
 
-	std::string flatColorVertexSrc = R"(
+  std::string flatColorVertexSrc = R"(
 		#version 460 core
 			
 		layout(location = 0) in vec3 a_Position;
@@ -99,7 +90,7 @@ ExampleLayer::ExampleLayer()
 		}
 	)";
 
-	std::string flatColorFragmentSrc = R"(
+  std::string flatColorFragmentSrc = R"(
 		#version 460 core
 			
 		layout(location = 0) out vec4 color;
@@ -112,64 +103,61 @@ ExampleLayer::ExampleLayer()
 		}
 	)";
 
-	m_FlatColorShader = GameEngine::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentSrc);
+  m_FlatColorShader = GameEngine::Shader::Create("FlatColor", flatColorVertexSrc, flatColorFragmentSrc);
 
-	auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
+  auto textureShader = m_ShaderLibrary.Load("assets/shaders/Texture.glsl");
 
-	m_Texture = GameEngine::Texture2D::Create("assets/textures/Checkerboard.png");
-	m_ChernoLogoTexture = GameEngine::Texture2D::Create("assets/textures/ChernoLogo.png");
+  m_Texture = GameEngine::Texture2D::Create("assets/textures/Checkerboard.png");
+  m_ChernoLogoTexture = GameEngine::Texture2D::Create("assets/textures/ChernoLogo.png");
 
-	textureShader->Bind();
-	textureShader->SetInt("u_Texture", 0);
+  textureShader->Bind();
+  textureShader->SetInt("u_Texture", 0);
 }
 
 void ExampleLayer::OnUpdate(GameEngine::Timestep ts)
 {
-	// Update
-	m_CameraController.OnUpdate(ts);
+  // Update
+  m_CameraController.OnUpdate(ts);
 
-	// Render
-	GameEngine::RenderCommand::SetClearColor({ 0.1f, 0.1f, 0.1f, 1.0f });
-	GameEngine::RenderCommand::Clear();
+  // Render
+  GameEngine::RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+  GameEngine::RenderCommand::Clear();
 
-	GameEngine::Renderer::BeginScene(m_CameraController.GetCamera());
+  GameEngine::Renderer::BeginScene(m_CameraController.GetCamera());
 
-	glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
+  glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.1f));
 
-	m_FlatColorShader->Bind();
-	m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
+  m_FlatColorShader->Bind();
+  m_FlatColorShader->SetFloat3("u_Color", m_SquareColor);
 
-	for (int y = 0; y < 20; y++)
-	{
-		for (int x = 0; x < 20; x++)
-		{
-			glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
-			glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
-			GameEngine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
-		}
-	}
+  for (int y = 0; y < 20; y++)
+  {
+    for (int x = 0; x < 20; x++)
+    {
+      glm::vec3 pos(x * 0.11f, y * 0.11f, 0.0f);
+      glm::mat4 transform = glm::translate(glm::mat4(1.0f), pos) * scale;
+      GameEngine::Renderer::Submit(m_FlatColorShader, m_SquareVA, transform);
+    }
+  }
 
-	auto textureShader = m_ShaderLibrary.Get("Texture");
+  auto textureShader = m_ShaderLibrary.Get("Texture");
 
-	m_Texture->Bind();
-	GameEngine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
-	m_ChernoLogoTexture->Bind();
-	GameEngine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+  m_Texture->Bind();
+  GameEngine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
+  m_ChernoLogoTexture->Bind();
+  GameEngine::Renderer::Submit(textureShader, m_SquareVA, glm::scale(glm::mat4(1.0f), glm::vec3(1.5f)));
 
-	// Triangle
-	//GameEngine::Renderer::Submit(m_Shader, m_VertexArray);
+  // Triangle
+  // GameEngine::Renderer::Submit(m_Shader, m_VertexArray);
 
-	GameEngine::Renderer::EndScene();
+  GameEngine::Renderer::EndScene();
 }
 
 void ExampleLayer::OnImGuiRender()
 {
-	ImGui::Begin("Settings");
-	ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
-	ImGui::End();
+  ImGui::Begin("Settings");
+  ImGui::ColorEdit3("Square Color", glm::value_ptr(m_SquareColor));
+  ImGui::End();
 }
 
-void ExampleLayer::OnEvent(GameEngine::Event& e)
-{
-	m_CameraController.OnEvent(e);
-}
+void ExampleLayer::OnEvent(GameEngine::Event& e) { m_CameraController.OnEvent(e); }

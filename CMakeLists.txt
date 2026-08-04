@@ -17,36 +17,32 @@ message("Enable WARNINGS as ERRORS: " ${GE_ENABLE_ALL_WARNINGS})
 add_library(myproject_warnings INTERFACE)
 
 if(GE_ENABLE_ALL_WARNINGS)
-    include(cmake/CompilerWarnings.cmake)
-    myproject_set_project_warnings(
-        myproject_warnings
-        ${myproject_WARNINGS_AS_ERRORS}
-        ""
-        ""
-        ""
-        "")
+  include(cmake/CompilerWarnings.cmake)
+  myproject_set_project_warnings(
+    myproject_warnings
+    ${myproject_WARNINGS_AS_ERRORS}
+    ""
+    ""
+    ""
+    ""
+  )
 endif()
 
 if(MSVC)
-    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-    set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
-    add_compile_options(/utf-8)
-endif()
-
-# Checks if the compiler emulates the MSVC interface (applies to MSVC and clang-cl)
-if(CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC")
-    add_compile_options($<$<COMPILE_LANGUAGE:CXX>:/std:c++latest>)
+  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+  set(USE_MSVC_RUNTIME_LIBRARY_DLL OFF CACHE BOOL "" FORCE)
+  add_compile_options(/utf-8)
 endif()
 
 if(UNIX AND NOT APPLE)
-    find_package(PkgConfig REQUIRED)
-    pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTKMM REQUIRED IMPORTED_TARGET gtkmm-4.0)
 endif()
 
 add_definitions(-DGE_PROJECT_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    set(CMAKE_BUILD_TYPE Debug)
+  set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

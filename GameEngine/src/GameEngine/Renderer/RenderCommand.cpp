@@ -1,8 +1,9 @@
-#include "gepch.h"
-#include "GameEngine/Renderer/RenderCommand.h"
+#include "gepch.hpp"
+#include "GameEngine/Renderer/RenderCommand.hpp"
 
-namespace GameEngine {
+namespace GameEngine
+{
 
-	Scope<RendererAPI> RenderCommand::s_RendererAPI = RendererAPI::Create();
+Scope<RendererAPI> RenderCommand::s_RendererAPI = RendererAPI::Create();
 
 }
