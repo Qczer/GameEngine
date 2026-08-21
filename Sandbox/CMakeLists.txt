@@ -1,6 +1,6 @@
 project(Sandbox)
 
-file(GLOB_RECURSE SANDBOX_SOURCES "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE SANDBOX_SOURCES "src/*.cpp" "src/*.hpp")
 add_executable(Sandbox ${SANDBOX_SOURCES})
 
 target_link_libraries(Sandbox PRIVATE GameEngine myproject_warnings)

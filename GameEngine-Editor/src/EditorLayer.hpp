@@ -7,6 +7,8 @@
 #include "GameEngine/Events/KeyEvent.hpp"
 #include "GameEngine/Renderer/EditorCamera.hpp"
 
+#include <filesystem>
+
 namespace GameEngine
 {
 
@@ -29,6 +31,7 @@ private:
 
   void NewScene();
   void OpenScene();
+  void OpenScene(const std::filesystem::path& path);
   void SaveSceneAs();
 
 private:

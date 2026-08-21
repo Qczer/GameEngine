@@ -7,11 +7,14 @@
 
 #include "GameEngine/Math/Math.hpp"
 
+#include <filesystem>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 namespace GameEngine
 {
+
+extern const std::filesystem::path g_AssetsPath;
 
 EditorLayer::EditorLayer() : Layer("EditorLayer"), m_CameraController(1280.0f / 720.0f) {}
 
@@ -208,6 +211,16 @@ void EditorLayer::OnImGuiRender()
   uint32_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
   ImGui::Image((void*)textureID, ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2{0, 1}, ImVec2{1, 0});
 
+  if (ImGui::BeginDragDropTarget())
+  {
+    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+    {
+      const wchar_t* path = (const wchar_t*)payload->Data;
+      OpenScene(std::filesystem::path(g_AssetsPath) / path);
+    }
+    ImGui::EndDragDropTarget();
+  }
+
   // Guizmo
   if (Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity())
   {
@@ -360,13 +373,24 @@ void EditorLayer::OpenScene()
 {
   if (std::optional<std::string> filepath = FileDialogs::OpenFile("GameEngine Scene (*.gameengine)\0*.gameengine\0"))
   {
-    m_ActiveScene = CreateRef<Scene>();
-    m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
-    m_SceneHierarchyPanel.SetContext(m_ActiveScene);
-
-    SceneSerializer serializer(m_ActiveScene);
-    serializer.Deserialize(*filepath);
+    OpenScene(*filepath);
   }
+}
+
+void EditorLayer::OpenScene(const std::filesystem::path& path)
+{
+  if (const auto ext = path.extension().string(); ext != ".gameengine")
+  {
+    GE_CORE_WARN("Invalid file extension. Expected '.gameengine', got {}", ext);
+    return;
+  }
+
+  m_ActiveScene = CreateRef<Scene>();
+  m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
+  m_SceneHierarchyPanel.SetContext(m_ActiveScene);
+
+  SceneSerializer serializer(m_ActiveScene);
+  serializer.Deserialize(path.string());
 }
 
 void EditorLayer::SaveSceneAs()

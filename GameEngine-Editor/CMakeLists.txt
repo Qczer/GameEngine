@@ -1,12 +1,12 @@
 project(GameEngine-Editor)
 
-file(GLOB_RECURSE EDITOR_SOURCES "src/*.cpp" "src/*.h")
+file(GLOB_RECURSE EDITOR_SOURCES "src/*.cpp" "src/*.hpp")
 add_executable(GameEngine-Editor ${EDITOR_SOURCES})
 
 target_link_libraries(GameEngine-Editor PRIVATE GameEngine myproject_warnings)
 
 if(UNIX)
-    target_link_libraries(GameEngine-Editor PRIVATE PkgConfig::GTKMM)
+  target_link_libraries(GameEngine-Editor PRIVATE PkgConfig::GTKMM)
 endif()
 
 target_compile_definitions(GameEngine-Editor PRIVATE

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <cstdint>
+#include <iostream>
+#include <string>
+
 namespace GameEngine
 {
 enum class KeyCode : uint16_t

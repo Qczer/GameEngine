@@ -2,14 +2,15 @@ cmake_minimum_required(VERSION 3.30)
 
 project(GameEngine-Workspace)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/Functions.cmake)
 
 option(GE_ENABLE_ALL_WARNINGS "Enable all compiler warnings" ON)
-option(myproject_WARNINGS_AS_ERRORS "Set warnings as errors" OFF)
+option(GE_WARNINGS_AS_ERRORS "Set warnings as errors" OFF)
 
 message("Enable ALL WARNINGS: " ${GE_ENABLE_ALL_WARNINGS})
 message("Enable WARNINGS as ERRORS: " ${GE_ENABLE_ALL_WARNINGS})
@@ -20,7 +21,7 @@ if(GE_ENABLE_ALL_WARNINGS)
   include(cmake/CompilerWarnings.cmake)
   myproject_set_project_warnings(
     myproject_warnings
-    ${myproject_WARNINGS_AS_ERRORS}
+    ${GE_WARNINGS_AS_ERRORS}
     ""
     ""
     ""

@@ -69,9 +69,6 @@ std::string OpenGLShader::ReadFile(const std::string& filepath)
 {
   GE_PROFILE_FUNCTION();
 
-  std::filesystem::path path(filepath);
-  GE_CORE_INFO("Trying to open: {}", std::filesystem::absolute(path).string());
-
   std::string result;
   std::ifstream in(filepath, std::ios::in | std::ios::binary);
   if (in)

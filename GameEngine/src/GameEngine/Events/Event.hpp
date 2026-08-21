@@ -29,11 +29,11 @@ enum EventType
 enum EventCategory
 {
   EventCategoryNone = 0,
-  EventCategoryApplication = BIT(0),
-  EventCategoryInput = BIT(1),
-  EventCategoryKeyboard = BIT(2),
-  EventCategoryMouse = BIT(3),
-  EventCategoryMouseButton = BIT(4)
+  EventCategoryApplication = 1u << 0,
+  EventCategoryInput = 1u << 1,
+  EventCategoryKeyboard = 1u << 2,
+  EventCategoryMouse = 1u << 3,
+  EventCategoryMouseButton = 1u << 4
 };
 
 // ## - acts a concatination operator in macros

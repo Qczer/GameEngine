@@ -9,9 +9,9 @@ namespace GameEngine
 {
 
 // Temporary
-static const std::filesystem::path s_AssetsPath = "assets";
+extern const std::filesystem::path g_AssetsPath = "assets";
 
-ContentBrowserPanel::ContentBrowserPanel() : m_CurrentDirectory(s_AssetsPath)
+ContentBrowserPanel::ContentBrowserPanel() : m_CurrentDirectory(g_AssetsPath)
 {
   m_DirectoryIcon = Texture2D::Create("resources/icons/ContentBrowser/DirectoryIcon.png");
   m_FileIcon = Texture2D::Create("resources/icons/ContentBrowser/FileIcon.png");
@@ -21,7 +21,7 @@ void ContentBrowserPanel::OnImGuiRender()
 {
   ImGui::Begin("Content Browser");
 
-  if (m_CurrentDirectory != std::filesystem::path(s_AssetsPath))
+  if (m_CurrentDirectory != std::filesystem::path(g_AssetsPath))
   {
     if (ImGui::Button("<-"))
       m_CurrentDirectory = m_CurrentDirectory.parent_path();
@@ -29,25 +29,33 @@ void ContentBrowserPanel::OnImGuiRender()
 
   static float padding = 16.0f;
   static float thumbnailSize = 128.0f;
-  static float cellSize = thumbnailSize + padding;
+  float cellSize = thumbnailSize + padding;
 
   float panelWidth = ImGui::GetContentRegionAvail().x;
-  int columnCount = static_cast<int>(panelWidth / cellSize);
-  if (columnCount < 1)
-    columnCount = 1;
+  int columnCount = std::max(static_cast<int>(panelWidth / cellSize), 1);
 
   ImGui::Columns(columnCount, 0, false);
 
   for (auto& directoryEntry : std::filesystem::directory_iterator(m_CurrentDirectory))
   {
     const auto& path = directoryEntry.path();
-    auto relativePath = std::filesystem::relative(path, s_AssetsPath);
+    auto relativePath = std::filesystem::relative(path, g_AssetsPath);
     std::string filenameString = relativePath.filename().string();
 
+    ImGui::PushID(filenameString.c_str());
     Ref<Texture2D> icon = directoryEntry.is_directory() ? m_DirectoryIcon : m_FileIcon;
     ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
     ImGui::ImageButton(filenameString.c_str(), static_cast<ImTextureRef>(icon->GetRendererID()),
                        {thumbnailSize, thumbnailSize}, {0, 1}, {1, 0});
+
+    if (ImGui::BeginDragDropSource())
+    {
+      const wchar_t* itemPath = relativePath.c_str();
+      // +1 for null terminator
+      ImGui::SetDragDropPayload("CONTENT_BROWSER_ITEM", itemPath, (wcslen(itemPath) + 1) * sizeof(wchar_t));
+      ImGui::EndDragDropSource();
+    }
+
     ImGui::PopStyleColor();
 
     if (ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
@@ -58,6 +66,8 @@ void ContentBrowserPanel::OnImGuiRender()
 
     ImGui::TextWrapped("%s", filenameString.c_str());
     ImGui::NextColumn();
+
+    ImGui::PopID();
   }
 
   ImGui::Columns(1);
