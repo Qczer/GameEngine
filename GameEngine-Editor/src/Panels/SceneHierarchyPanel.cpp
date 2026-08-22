@@ -5,11 +5,14 @@
 
 #include <glm/gtc/type_ptr.hpp>
 
+#include "GameEngine/Renderer/Texture.hpp"
 #include "GameEngine/Scene/Components.hpp"
 #include "SceneHierarchyPanel.hpp"
 
 namespace GameEngine
 {
+
+extern const std::filesystem::path g_AssetsPath;
 
 SceneHierarchyPanel::SceneHierarchyPanel(const Ref<Scene>& scene) { SetContext(scene); }
 
@@ -60,8 +63,7 @@ void SceneHierarchyPanel::DrawEntityNode(Entity& entity)
 {
   auto& tag = entity.GetComponent<TagComponent>().Tag;
 
-  ImGuiTreeNodeFlags flags
-      = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+  ImGuiTreeNodeFlags flags = ((m_SelectionContext == entity) ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
   flags |= ImGuiTreeNodeFlags_SpanAvailWidth;
 
   bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, "%s", tag.c_str());
@@ -95,8 +97,8 @@ void SceneHierarchyPanel::DrawEntityNode(Entity& entity)
   }
 }
 
-static void DrawResetButton(const std::string& name, float& value, float resetValue, ImVec4 color, ImVec4 hoveredColor,
-                            ImVec2 buttonSize, ImFont* boldFont)
+static void DrawResetButton(const std::string& name, float& value, float resetValue, ImVec4 color, ImVec4 hoveredColor, ImVec2 buttonSize,
+                            ImFont* boldFont)
 {
   ImGui::PushStyleColor(ImGuiCol_Button, color);
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, hoveredColor);
@@ -115,8 +117,7 @@ static void DrawResetButton(const std::string& name, float& value, float resetVa
   ImGui::SameLine();
 }
 
-static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f,
-                            float columnWidth = 100.f)
+static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.f)
 {
   ImGuiIO& io = ImGui::GetIO();
   auto boldFont = io.Fonts->Fonts[0];
@@ -136,8 +137,7 @@ static void DrawVec3Control(const std::string& label, glm::vec3& values, float r
 
   DrawResetButton("X", values.x, resetValue, {0.8f, 0.1f, 0.15f, 1.0f}, {0.9f, 0.2f, 0.2f, 1.0f}, buttonSize, boldFont);
   DrawResetButton("Y", values.y, resetValue, {0.2f, 0.7f, 0.2f, 1.0f}, {0.3f, 0.8f, 0.3f, 1.0f}, buttonSize, boldFont);
-  DrawResetButton("Z", values.z, resetValue, {0.1f, 0.25f, 0.8f, 1.0f}, {0.2f, 0.35f, 0.9f, 1.0f}, buttonSize,
-                  boldFont);
+  DrawResetButton("Z", values.z, resetValue, {0.1f, 0.25f, 0.8f, 1.0f}, {0.2f, 0.35f, 0.9f, 1.0f}, buttonSize, boldFont);
 
   ImGui::PopStyleVar();
 
@@ -146,12 +146,10 @@ static void DrawVec3Control(const std::string& label, glm::vec3& values, float r
   ImGui::PopID();
 }
 
-template <typename T, typename UIFunction>
-static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
+template <typename T, typename UIFunction> static void DrawComponent(const std::string& name, Entity entity, UIFunction uiFunction)
 {
-  constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed
-                                               | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanAvailWidth
-                                               | ImGuiTreeNodeFlags_AllowItemOverlap;
+  constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding
+                                               | ImGuiTreeNodeFlags_SpanAvailWidth | ImGuiTreeNodeFlags_AllowItemOverlap;
 
   if (entity.HasComponent<T>())
   {
@@ -300,8 +298,25 @@ void SceneHierarchyPanel::DrawComponents(Entity& entity)
                                    }
                                  });
 
-  DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity, [](auto& component)
-                                         { ImGui::ColorEdit4("Color", glm::value_ptr(component.Color)); });
+  DrawComponent<SpriteRendererComponent>("Sprite Renderer", entity,
+                                         [](auto& component)
+                                         {
+                                           ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+
+                                           ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+                                           if (ImGui::BeginDragDropTarget())
+                                           {
+                                             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
+                                             {
+                                               const wchar_t* path = (const wchar_t*)payload->Data;
+                                               std::filesystem::path texturePath = std::filesystem::path(g_AssetsPath) / path;
+                                               component.Texture = Texture2D::Create(texturePath.string());
+                                             }
+                                             ImGui::EndDragDropTarget();
+                                           }
+
+                                           ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
+                                         });
 }
 
 } // namespace GameEngine
