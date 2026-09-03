@@ -25,8 +25,7 @@ void EditorLayer::OnAttach()
   m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
 
   FramebufferSpecification framebufferSpec;
-  framebufferSpec.Attachments
-      = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
+  framebufferSpec.Attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
   framebufferSpec.Width = 1280;
   framebufferSpec.Height = 720;
   m_Framebuffer = Framebuffer::Create(framebufferSpec);
@@ -59,8 +58,7 @@ void EditorLayer::OnUpdate(Timestep ts)
 
   // Resize framebuffer
   if (auto spec = m_Framebuffer->GetSpecification();
-      m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f
-      && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
+      m_ViewportSize.x > 0.0f && m_ViewportSize.y > 0.0f && (spec.Width != m_ViewportSize.x || spec.Height != m_ViewportSize.y))
   {
     m_Framebuffer->Resize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
     m_CameraController.OnResize(m_ViewportSize.x, m_ViewportSize.y);
@@ -93,8 +91,7 @@ void EditorLayer::OnUpdate(Timestep ts)
   int mouseX = static_cast<int>(mx);
   int mouseY = static_cast<int>(my);
 
-  if (mouseX > 0 && mouseY > 0 && mouseX < static_cast<int>(viewportSize.x)
-      && mouseY < static_cast<int>(viewportSize.y))
+  if (mouseX > 0 && mouseY > 0 && mouseX < static_cast<int>(viewportSize.x) && mouseY < static_cast<int>(viewportSize.y))
   {
     if (const std::optional<int> pixelData = m_Framebuffer->ReadPixel(1, mouseX, mouseY))
       m_HoveredEntity.emplace(static_cast<entt::entity>(*pixelData), m_ActiveScene.get());
@@ -123,8 +120,7 @@ void EditorLayer::OnImGuiRender()
     ImGui::SetNextWindowViewport(viewport->ID);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
     ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize
-                    | ImGuiWindowFlags_NoMove;
+    window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
     window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
   }
 
@@ -215,7 +211,7 @@ void EditorLayer::OnImGuiRender()
   {
     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
     {
-      const wchar_t* path = (const wchar_t*)payload->Data;
+      const char* path = (const char*)payload->Data;
       OpenScene(std::filesystem::path(g_AssetsPath) / path);
     }
     ImGui::EndDragDropTarget();
@@ -256,9 +252,8 @@ void EditorLayer::OnImGuiRender()
 
     float snapValues[3] = {snapValue, snapValue, snapValue};
 
-    ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection),
-                         static_cast<ImGuizmo::OPERATION>(m_GuizmoType), IMGUIZMO_NAMESPACE::LOCAL,
-                         glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
+    ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), static_cast<ImGuizmo::OPERATION>(m_GuizmoType),
+                         IMGUIZMO_NAMESPACE::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
 
     m_GuizmoHovered = ImGuizmo::IsOver();
 

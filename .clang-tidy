@@ -1,5 +1,4 @@
 HeaderFilterRegex: "^(GameEngine/src|GameEngine-Editor/src|Sandbox/src)/.*"
-AnalyzeTemporaryDtors: true
 WarningsAsErrors: ""
 Checks: "-*,
   bugprone-argument-comment,
@@ -144,4 +143,3 @@ Checks: "-*,
   readability-string-compare,
   readability-uniqueptr-delete-release,
   readability-use-anyofallof"
-

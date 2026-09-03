@@ -308,7 +308,7 @@ void SceneHierarchyPanel::DrawComponents(Entity& entity)
                                            {
                                              if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM"))
                                              {
-                                               const wchar_t* path = (const wchar_t*)payload->Data;
+                                               const char* path = (const char*)payload->Data;
                                                std::filesystem::path texturePath = std::filesystem::path(g_AssetsPath) / path;
                                                component.Texture = Texture2D::Create(texturePath.string());
                                              }
