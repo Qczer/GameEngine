@@ -4,8 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <print>
-
 Sandbox2D::Sandbox2D() : Layer("Sandbox2D"), m_CameraController(1280.0f / 720.0f) {}
 
 void Sandbox2D::OnAttach()
@@ -27,7 +25,7 @@ void Sandbox2D::OnUpdate(GameEngine::Timestep ts)
 
   // Update
   m_CameraController.OnUpdate(ts);
-  m_FrameRate = (float)ts;
+  m_FrameRate = static_cast<float>(ts);
 
   // Render
   GameEngine::Renderer2D::ResetStats();
@@ -50,10 +48,13 @@ void Sandbox2D::OnUpdate(GameEngine::Timestep ts)
     GameEngine::Renderer2D::DrawQuad({0.0f, 0.0f, -0.1f}, {20.0f, 20.0f}, m_Texture, 20.0f);
     GameEngine::Renderer2D::DrawRotatedQuad({-2.0f, 0.0f}, {1.0f, 1.0f}, rotation, m_Texture, 20.0f);
 
-    for (float y = -5.0f; y < 5.0f; y += 0.5f)
+    for (int yi = 0; yi < 20; yi++)
     {
-      for (float x = -5.0f; x < 5.0f; x += 0.5f)
+      for (int xi = 0; xi < 20; xi++)
       {
+        float y = -5.0f + static_cast<float>(yi) * 0.5f;
+        float x = -5.0f + static_cast<float>(xi) * 0.5f;
+
         glm::vec4 color = {(x + 5.0f) / 10.0f, 0.4f, (y + 5.0f) / 10.0f, 0.75f};
         GameEngine::Renderer2D::DrawQuad({x, y}, {0.45f, 0.45f}, color);
       }
@@ -72,7 +73,7 @@ void Sandbox2D::OnImGuiRender()
     ImGui::Begin("Settings");
 
     auto stats = GameEngine::Renderer2D::GetStats();
-    ImGui::Text("Framerate: %i", (int)(1.0f / m_FrameRate));
+    ImGui::Text("Framerate: %i", static_cast<int>(1.0f / m_FrameRate));
     ImGui::Text("Draw Calls: %d", stats.DrawCalls);
     ImGui::Text("Quads: %d", stats.QuadCount);
     ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
