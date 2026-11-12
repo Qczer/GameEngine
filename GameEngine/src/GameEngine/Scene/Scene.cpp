@@ -7,14 +7,12 @@
 #include "ScriptableEntity.hpp"
 
 #include <glm/glm.hpp>
+#include <optional>
 
 namespace GameEngine
 {
 
-static void OnTransformConstruct(entt::registry& /*registry*/, entt::entity /*entity*/)
-{
-  GE_CORE_TRACE("Constructed a transform");
-}
+static void OnTransformConstruct(entt::registry& /*registry*/, entt::entity /*entity*/) { GE_CORE_TRACE("Constructed a transform"); }
 
 Entity Scene::CreateEntity(const std::string& name)
 {
@@ -47,7 +45,7 @@ void Scene::OnUpdateRuntime(Timestep ts)
   }
 
   // Render 2D
-  Camera* mainCamera = nullptr;
+  std::optional<Camera> mainCamera;
   glm::mat4 cameraTransform;
   {
     auto view = m_Registry.view<TransformComponent, CameraComponent>();
@@ -55,7 +53,7 @@ void Scene::OnUpdateRuntime(Timestep ts)
     {
       if (cameraComponent.Primary)
       {
-        mainCamera = &cameraComponent.Camera;
+        mainCamera = cameraComponent.Camera;
         cameraTransform = tc.GetTransform();
         break;
       }

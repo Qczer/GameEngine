@@ -1,4 +1,6 @@
 #include "EditorLayer.hpp"
+#include "GameEngine/Core/Log.hpp"
+#include "GameEngine/Scene/Scene.hpp"
 #include "GameEngine/Scene/SceneSerializer.hpp"
 #include "GameEngine/Utils/PlatformUtils.hpp"
 
@@ -23,6 +25,8 @@ void EditorLayer::OnAttach()
   GE_PROFILE_FUNCTION();
 
   m_Texture = Texture2D::Create("assets/textures/Checkerboard.png");
+  m_IconPlay = Texture2D::Create("resources/icons/PlayButton.png");
+  m_IconStop = Texture2D::Create("resources/icons/StopButton.png");
 
   FramebufferSpecification framebufferSpec;
   framebufferSpec.Attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth};
@@ -66,12 +70,6 @@ void EditorLayer::OnUpdate(Timestep ts)
     m_ActiveScene->OnViewportResize(static_cast<uint32_t>(m_ViewportSize.x), static_cast<uint32_t>(m_ViewportSize.y));
   }
 
-  // Update camera controller
-  if (m_ViewportFocused)
-    m_CameraController.OnUpdate(ts);
-
-  m_EditorCamera.OnUpdate(ts);
-
   m_Framebuffer->Bind();
   RenderCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1});
   RenderCommand::Clear();
@@ -79,8 +77,25 @@ void EditorLayer::OnUpdate(Timestep ts)
   // Clear entity ID attachment to -1
   m_Framebuffer->ClearAttachment(1, -1);
 
-  // Update scene
-  m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+  switch (m_SceneState)
+  {
+    case SceneState::Edit:
+    {
+      if (m_ViewportFocused)
+        m_CameraController.OnUpdate(ts);
+
+      m_EditorCamera.OnUpdate(ts);
+
+      m_ActiveScene->OnUpdateEditor(ts, m_EditorCamera);
+      break;
+    }
+
+    case SceneState::Play:
+    {
+      m_ActiveScene->OnUpdateRuntime(ts);
+      break;
+    }
+  }
 
   auto [mx, my] = ImGui::GetMousePos();
   mx -= m_ViewportBounds[0].x;
@@ -276,6 +291,39 @@ void EditorLayer::OnImGuiRender()
   ImGui::End();
   ImGui::PopStyleVar();
 
+  UI_Toolbar();
+
+  ImGui::End();
+}
+
+void EditorLayer::UI_Toolbar()
+{
+  ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 2});
+  ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2{0, 0});
+  ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0, 0, 0, 0});
+
+  const auto& colors = ImGui::GetStyle().Colors;
+  const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+  const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{buttonActive.x, buttonActive.y, buttonActive.z, 0.5f});
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f});
+
+  ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+  const float size = ImGui::GetWindowHeight() - 4.0f;
+  ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+
+  Ref<Texture2D> icon = m_SceneState == SceneState::Edit ? m_IconPlay : m_IconStop;
+  if (ImGui::ImageButton("PlayButton", (ImTextureID)icon->GetRendererID(), ImVec2{size, size}, ImVec2{0, 0}, ImVec2{1, 1}))
+  {
+    if (m_SceneState == SceneState::Edit)
+      OnScenePlay();
+    else if (m_SceneState == SceneState::Play)
+      OnSceneStop();
+  }
+
+  ImGui::PopStyleVar(2);
+  ImGui::PopStyleColor(3);
   ImGui::End();
 }
 
@@ -340,14 +388,6 @@ bool EditorLayer::OnMouseButtonPressed(MouseButtonPressedEvent& e)
 {
   if (e.GetMouseButton() == Mouse::ButtonLeft && m_ViewportHovered && !Input::IsKeyPressed(Key::LeftAlt))
   {
-
-    if (m_HoveredEntity && m_HoveredEntity->HasComponent<TagComponent>())
-    {
-      std::string name = m_HoveredEntity->GetComponent<TagComponent>().Tag;
-      GE_CORE_TRACE("m_HoveredEntity: {}", name);
-    }
-    GE_CORE_TRACE("m_GuizmoHovered: {}", m_GuizmoHovered);
-
     if (m_HoveredEntity && !m_GuizmoHovered)
       m_SceneHierarchyPanel.SetSelectedEntity(*m_HoveredEntity);
     else if (!m_GuizmoHovered)
@@ -396,5 +436,7 @@ void EditorLayer::SaveSceneAs()
     serializer.Serialize(*filepath);
   }
 }
+void EditorLayer::OnScenePlay() { m_SceneState = SceneState::Play; }
+void EditorLayer::OnSceneStop() { m_SceneState = SceneState::Edit; }
 
 } // namespace GameEngine

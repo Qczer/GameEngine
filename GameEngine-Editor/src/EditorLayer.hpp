@@ -6,6 +6,7 @@
 
 #include "GameEngine/Events/KeyEvent.hpp"
 #include "GameEngine/Renderer/EditorCamera.hpp"
+#include "GameEngine/Scene/SceneSerializer.hpp"
 
 #include <filesystem>
 
@@ -34,6 +35,12 @@ private:
   void OpenScene(const std::filesystem::path& path);
   void SaveSceneAs();
 
+  void OnScenePlay();
+  void OnSceneStop();
+
+  // UI Panels
+  void UI_Toolbar();
+
 private:
   OrthographicCameraController m_CameraController;
 
@@ -47,6 +54,9 @@ private:
   EditorCamera m_EditorCamera;
   std::optional<Entity> m_HoveredEntity;
 
+  float m_FrameRate = 0.0f;
+  float m_ElapsedTime = 0.0f;
+
   bool m_ViewportFocused = false;
   bool m_ViewportHovered = false;
   bool m_GuizmoHovered = false;
@@ -55,12 +65,19 @@ private:
   glm::vec4 m_SquareColor = {0.2f, 0.3f, 0.8f, 1.0f};
   int m_GuizmoType = 7;
 
+  enum class SceneState
+  {
+    Edit = 0,
+    Play = 1
+  };
+  SceneState m_SceneState = SceneState::Edit;
+
   // Panels
   SceneHierarchyPanel m_SceneHierarchyPanel;
   ContentBrowserPanel m_ContentBrowserPanel;
 
-  float m_FrameRate = 0.0f;
-  float m_ElapsedTime = 0.0f;
+  // Editor resources
+  Ref<Texture2D> m_IconPlay, m_IconStop;
 };
 
 } // namespace GameEngine
